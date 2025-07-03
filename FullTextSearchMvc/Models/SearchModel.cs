@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace FullTextSearchMvc.Models
@@ -15,5 +16,10 @@ namespace FullTextSearchMvc.Models
         public string Content { get; set; }
         public string Excerpt { get; set; }
         public double Relevance { get; set; }
+        
+        // Additional fields from the database
+        public string Author { get; set; }
+        public string Category { get; set; }
+        public DateTime PublishedDate { get; set; }
     }
 }

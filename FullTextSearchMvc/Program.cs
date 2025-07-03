@@ -3,6 +3,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Register the full-text search service
+builder.Services.AddScoped<FullTextSearchMvc.Services.FullTextSearchService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

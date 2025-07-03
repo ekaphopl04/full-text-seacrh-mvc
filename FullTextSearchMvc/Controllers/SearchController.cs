@@ -1,22 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using FullTextSearchMvc.Models;
+using FullTextSearchMvc.Services;
 
 namespace FullTextSearchMvc.Controllers
 {
     public class SearchController : Controller
     {
-        // Sample data for demonstration purposes
-        private static readonly List<SearchResult> _sampleData = new List<SearchResult>
+        private readonly FullTextSearchService _searchService;
+
+        public SearchController(FullTextSearchService searchService)
         {
-            new SearchResult { Id = 1, Title = "Introduction to C#", Content = "C# is a modern, object-oriented programming language developed by Microsoft." },
-            new SearchResult { Id = 2, Title = "ASP.NET Core MVC", Content = "ASP.NET Core MVC is a web framework for building web apps and APIs using the Model-View-Controller design pattern." },
-            new SearchResult { Id = 3, Title = "Entity Framework Core", Content = "Entity Framework Core is an object-database mapper for .NET that enables developers to work with a database using .NET objects." },
-            new SearchResult { Id = 4, Title = "JavaScript Basics", Content = "JavaScript is a lightweight, interpreted programming language with object-oriented capabilities." },
-            new SearchResult { Id = 5, Title = "Introduction to HTML", Content = "HTML (HyperText Markup Language) is the standard markup language for documents designed to be displayed in a web browser." }
-        };
+            _searchService = searchService;
+        }
 
         public IActionResult Index()
         {
@@ -24,16 +23,47 @@ namespace FullTextSearchMvc.Controllers
         }
 
         [HttpPost]
-        public IActionResult Search(SearchModel model)
+        public async Task<IActionResult> Search(SearchModel model)
         {
             if (string.IsNullOrWhiteSpace(model.Query))
             {
                 return View("Index", model);
             }
 
-            // Simple full-text search implementation
-            var query = model.Query.ToLower();
-            var results = _sampleData
+            try
+            {
+                // Use the PostgreSQL full-text search service
+                var results = await _searchService.SearchAsync(model.Query);
+                model.Results = results;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Search error: {ex.Message}");
+                ModelState.AddModelError(string.Empty, "An error occurred while performing the search. Please try again.");
+                
+                // Fallback to simple search if database search fails
+                model.Results = FallbackSearch(model.Query);
+            }
+
+            return View("Index", model);
+        }
+
+        // Fallback search method in case the database search fails
+        private List<SearchResult> FallbackSearch(string query)
+        {
+            // Sample data for demonstration purposes
+            var sampleData = new List<SearchResult>
+            {
+                new SearchResult { Id = 1, Title = "Introduction to C#", Content = "C# is a modern, object-oriented programming language developed by Microsoft." },
+                new SearchResult { Id = 2, Title = "ASP.NET Core MVC", Content = "ASP.NET Core MVC is a web framework for building web apps and APIs using the Model-View-Controller design pattern." },
+                new SearchResult { Id = 3, Title = "Entity Framework Core", Content = "Entity Framework Core is an object-database mapper for .NET that enables developers to work with a database using .NET objects." },
+                new SearchResult { Id = 4, Title = "JavaScript Basics", Content = "JavaScript is a lightweight, interpreted programming language with object-oriented capabilities." },
+                new SearchResult { Id = 5, Title = "Introduction to HTML", Content = "HTML (HyperText Markup Language) is the standard markup language for documents designed to be displayed in a web browser." }
+            };
+
+            query = query.ToLower();
+            return sampleData
                 .Where(item => 
                     item.Title.ToLower().Contains(query) || 
                     item.Content.ToLower().Contains(query))
@@ -69,9 +99,6 @@ namespace FullTextSearchMvc.Controllers
                 })
                 .OrderByDescending(item => item.Relevance)
                 .ToList();
-
-            model.Results = results;
-            return View("Index", model);
         }
     }
 }
