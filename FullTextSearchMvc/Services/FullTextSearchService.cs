@@ -103,9 +103,11 @@ namespace FullTextSearchMvc.Services
             
             try
             {
+                _logger.LogInformation("Attempting to connect to database to retrieve all articles");
                 using (var connection = new NpgsqlConnection(_connectionString))
                 {
                     await connection.OpenAsync();
+                    _logger.LogInformation("Database connection established successfully for retrieving articles");
                     
                     using (var cmd = new NpgsqlCommand())
                     {
