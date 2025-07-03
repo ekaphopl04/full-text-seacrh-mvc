@@ -17,9 +17,11 @@ namespace FullTextSearchMvc.Controllers
             _searchService = searchService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(new SearchModel());
+            var model = new SearchModel();
+            model.AllArticles = await _searchService.GetAllArticlesAsync();
+            return View(model);
         }
 
         [HttpPost]

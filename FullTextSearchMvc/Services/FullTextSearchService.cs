@@ -83,5 +83,52 @@ namespace FullTextSearchMvc.Services
             // This handles basic AND operations between words
             return string.Join(" & ", query.Split(' ', StringSplitOptions.RemoveEmptyEntries));
         }
+        
+        public async Task<List<Article>> GetAllArticlesAsync()
+        {
+            var articles = new List<Article>();
+            
+            try
+            {
+                using (var connection = new NpgsqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        cmd.CommandText = @"
+                            SELECT article_id, title, content, author, category, published_date, last_modified
+                            FROM articles
+                            ORDER BY published_date DESC";
+                        
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                articles.Add(new Article
+                                {
+                                    ArticleId = reader.GetInt32(0),
+                                    Title = reader.GetString(1),
+                                    Content = reader.GetString(2),
+                                    Author = !reader.IsDBNull(3) ? reader.GetString(3) : null,
+                                    Category = !reader.IsDBNull(4) ? reader.GetString(4) : null,
+                                    PublishedDate = !reader.IsDBNull(5) ? reader.GetDateTime(5) : DateTime.MinValue,
+                                    LastModified = !reader.IsDBNull(6) ? reader.GetDateTime(6) : DateTime.MinValue
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Database error when retrieving all articles: {ex.Message}");
+                // Return empty list on error
+                return new List<Article>();
+            }
+            
+            return articles;
+        }
     }
 }
