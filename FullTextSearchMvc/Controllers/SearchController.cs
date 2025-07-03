@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using FullTextSearchMvc.Models;
 using FullTextSearchMvc.Services;
 
@@ -11,16 +12,29 @@ namespace FullTextSearchMvc.Controllers
     public class SearchController : Controller
     {
         private readonly FullTextSearchService _searchService;
+        private readonly ILogger<SearchController> _logger;
 
-        public SearchController(FullTextSearchService searchService)
+        public SearchController(FullTextSearchService searchService, ILogger<SearchController> logger)
         {
             _searchService = searchService;
+            _logger = logger;
+            _logger.LogInformation("SearchController initialized");
         }
 
         public async Task<IActionResult> Index()
         {
+            _logger.LogInformation("Loading Index page and retrieving all articles");
             var model = new SearchModel();
-            model.AllArticles = await _searchService.GetAllArticlesAsync();
+            try
+            {
+                model.AllArticles = await _searchService.GetAllArticlesAsync();
+                _logger.LogInformation("Successfully retrieved {Count} articles", model.AllArticles?.Count ?? 0);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving articles for Index page: {Message}", ex.Message);
+                model.AllArticles = new List<Article>();
+            }
             return View(model);
         }
 
@@ -41,9 +55,10 @@ namespace FullTextSearchMvc.Controllers
             catch (Exception ex)
             {
                 // Log the exception
-                Console.WriteLine($"Search error: {ex.Message}");
+                _logger.LogError(ex, "Search error: {Message}", ex.Message);
                 ModelState.AddModelError(string.Empty, "An error occurred while performing the search. Please try again.");
                 
+                _logger.LogInformation("Using fallback search method due to database error");
                 // Fallback to simple search if database search fails
                 model.Results = FallbackSearch(model.Query);
             }

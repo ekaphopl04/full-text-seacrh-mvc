@@ -41,9 +41,11 @@ namespace FullTextSearchMvc.Services
 
             try
             {
+                _logger.LogInformation("Attempting to connect to database for search query: {Query}", query);
                 using (var connection = new NpgsqlConnection(_connectionString))
                 {
                     await connection.OpenAsync();
+                    _logger.LogInformation("Database connection established successfully for search operation");
 
                     // Execute the full-text search query
                     using (var cmd = new NpgsqlCommand())
