@@ -1,0 +1,93 @@
+@model FullTextSearchMvc.Models.Article
+
+@{
+    ViewData["Title"] = "Edit Article";
+}
+
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Search" asp-action="Index">Search</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit Article</li>
+                </ol>
+            </nav>
+            <h1 class="display-5 mb-3">
+                <i class="fas fa-edit me-2"></i>Edit Article
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Article #@Model.ArticleId</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input type="hidden" asp-for="ArticleId" />
+                        <input type="hidden" asp-for="PublishedDate" />
+                        <input type="hidden" asp-for="LastModified" />
+
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label">Title</label>
+                            <input asp-for="Title" class="form-control" required />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Content" class="form-label">Content</label>
+                            <textarea asp-for="Content" class="form-control" rows="10" required></textarea>
+                            <span asp-validation-for="Content" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Author" class="form-label">Author</label>
+                                <input asp-for="Author" class="form-control" />
+                                <span asp-validation-for="Author" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Category" class="form-label">Category</label>
+                                <input asp-for="Category" class="form-control" />
+                                <span asp-validation-for="Category" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Published Date</label>
+                                <p class="form-control-plaintext">
+                                    @(Model.PublishedDate != DateTime.MinValue ? Model.PublishedDate.ToString("MMM dd, yyyy HH:mm") : "Not published")
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Modified</label>
+                                <p class="form-control-plaintext">
+                                    @(Model.LastModified != DateTime.MinValue ? Model.LastModified.ToString("MMM dd, yyyy HH:mm") : "Never modified")
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Search" asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Search
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

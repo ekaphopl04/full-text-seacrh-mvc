@@ -147,5 +147,99 @@ namespace FullTextSearchMvc.Services
             
             return articles;
         }
+        
+        public async Task<Article> GetArticleByIdAsync(int id)
+        {
+            try
+            {
+                _logger.LogInformation("Attempting to retrieve article with ID {Id}", id);
+                using (var connection = new NpgsqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        cmd.CommandText = @"
+                            SELECT article_id, title, content, author, category, published_date, last_modified
+                            FROM articles
+                            WHERE article_id = @id";
+                        cmd.Parameters.AddWithValue("id", id);
+                        
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                return new Article
+                                {
+                                    ArticleId = reader.GetInt32(0),
+                                    Title = reader.GetString(1),
+                                    Content = reader.GetString(2),
+                                    Author = !reader.IsDBNull(3) ? reader.GetString(3) : null,
+                                    Category = !reader.IsDBNull(4) ? reader.GetString(4) : null,
+                                    PublishedDate = !reader.IsDBNull(5) ? reader.GetDateTime(5) : DateTime.MinValue,
+                                    LastModified = !reader.IsDBNull(6) ? reader.GetDateTime(6) : DateTime.MinValue
+                                };
+                            }
+                        }
+                    }
+                }
+                
+                _logger.LogWarning("Article with ID {Id} not found", id);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving article with ID {Id}: {ErrorMessage}", id, ex.Message);
+                return null;
+            }
+        }
+        
+        public async Task<bool> UpdateArticleAsync(Article article)
+        {
+            try
+            {
+                _logger.LogInformation("Attempting to update article with ID {Id}", article.ArticleId);
+                using (var connection = new NpgsqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        cmd.CommandText = @"
+                            UPDATE articles
+                            SET title = @title,
+                                content = @content,
+                                author = @author,
+                                category = @category,
+                                last_modified = CURRENT_TIMESTAMP
+                            WHERE article_id = @id;
+                            
+                            -- Update the search vector
+                            UPDATE articles
+                            SET search_vector = setweight(to_tsvector('english', title), 'A') ||
+                                               setweight(to_tsvector('english', COALESCE(content, '')), 'B') ||
+                                               setweight(to_tsvector('english', COALESCE(author, '')), 'C') ||
+                                               setweight(to_tsvector('english', COALESCE(category, '')), 'D')
+                            WHERE article_id = @id";
+                            
+                        cmd.Parameters.AddWithValue("id", article.ArticleId);
+                        cmd.Parameters.AddWithValue("title", article.Title);
+                        cmd.Parameters.AddWithValue("content", article.Content);
+                        cmd.Parameters.AddWithValue("author", article.Author ?? (object)DBNull.Value);
+                        cmd.Parameters.AddWithValue("category", article.Category ?? (object)DBNull.Value);
+                        
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating article with ID {Id}: {ErrorMessage}", article.ArticleId, ex.Message);
+                return false;
+            }
+        }
     }
 }
