@@ -21,20 +21,34 @@ namespace FullTextSearchMvc.Controllers
             _logger.LogInformation("SearchController initialized");
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string categoryFilter = null)
         {
             _logger.LogInformation("Loading Index page and retrieving all articles");
-            var model = new SearchModel();
+            var model = new SearchModel
+            {
+                CategoryFilter = categoryFilter
+            };
+            
             try
             {
+                // Get all articles
                 model.AllArticles = await _searchService.GetAllArticlesAsync();
                 _logger.LogInformation("Successfully retrieved {Count} articles", model.AllArticles?.Count ?? 0);
+                
+                // Get all available categories for the filter dropdown
+                model.AvailableCategories = model.AllArticles
+                    .Where(a => !string.IsNullOrEmpty(a.Category))
+                    .Select(a => a.Category)
+                    .Distinct()
+                    .OrderBy(c => c)
+                    .ToList();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving articles for Index page: {Message}", ex.Message);
                 model.AllArticles = new List<Article>();
             }
+            
             return View(model);
         }
 
@@ -43,13 +57,31 @@ namespace FullTextSearchMvc.Controllers
         {
             if (string.IsNullOrWhiteSpace(model.Query))
             {
-                return View("Index", model);
+                return RedirectToAction("Index", new { categoryFilter = model.CategoryFilter });
             }
 
             try
             {
+                // Get all articles for the dropdown and filtered display
+                model.AllArticles = await _searchService.GetAllArticlesAsync();
+                
+                // Get all available categories for the filter dropdown
+                model.AvailableCategories = model.AllArticles
+                    .Where(a => !string.IsNullOrEmpty(a.Category))
+                    .Select(a => a.Category)
+                    .Distinct()
+                    .OrderBy(c => c)
+                    .ToList();
+                
                 // Use the PostgreSQL full-text search service
                 var results = await _searchService.SearchAsync(model.Query);
+                
+                // Apply category filter if selected
+                if (!string.IsNullOrEmpty(model.CategoryFilter))
+                {
+                    results = results.Where(r => r.Category == model.CategoryFilter).ToList();
+                }
+                
                 model.Results = results;
             }
             catch (Exception ex)

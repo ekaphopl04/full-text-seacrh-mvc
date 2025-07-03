@@ -6,6 +6,8 @@ namespace FullTextSearchMvc.Models
     public class SearchModel
     {
         public string Query { get; set; }
+        public string CategoryFilter { get; set; }
+        public List<string> AvailableCategories { get; set; } = new List<string>();
         public List<SearchResult> Results { get; set; } = new List<SearchResult>();
         public List<Article> AllArticles { get; set; } = new List<Article>();
     }
