@@ -196,43 +196,77 @@ A responsive design adapts the layout to the viewing environment by using fluid,
 
 -- Associate Articles with Tags
 INSERT INTO article_tags (article_id, tag_id) VALUES
-(1, 1), -- C# article with C# tag
-(1, 10), -- C# article with Entity Framework tag
-(2, 2), -- ASP.NET article with ASP.NET tag
-(2, 3), -- ASP.NET article with MVC tag
-(3, 4), -- PostgreSQL article with PostgreSQL tag
-(3, 5), -- PostgreSQL article with Full-Text Search tag
-(3, 9), -- PostgreSQL article with Database tag
-(4, 1), -- Entity Framework article with C# tag
-(4, 10), -- Entity Framework article with Entity Framework tag
-(4, 11), -- Entity Framework article with LINQ tag
-(5, 6), -- JavaScript article with JavaScript tag
-(5, 7), -- JavaScript article with HTML tag
-(5, 8), -- JavaScript article with CSS tag
-(6, 16), -- Python article with Python tag
-(7, 17), -- React article with React tag
-(7, 6), -- React article with JavaScript tag
-(8, 14), -- Machine Learning article with AI tag
-(8, 15), -- Machine Learning article with Machine Learning tag
-(9, 20), -- Docker article with Docker tag
-(10, 17), -- Angular vs React article with React tag
-(10, 18), -- Angular vs React article with Angular tag
-(11, 13), -- Cloud Computing article with Cloud Computing tag
-(11, 12), -- Cloud Computing article with Azure tag
-(12, 11), -- LINQ article with LINQ tag
-(12, 1), -- LINQ article with C# tag
-(13, 1), -- Xamarin article with C# tag
-(14, 14), -- Neural Networks article with AI tag
-(14, 15), -- Neural Networks article with Machine Learning tag
-(15, 20), -- Microservices article with Docker tag
-(16, 8), -- CSS Grid article with CSS tag
-(16, 7), -- CSS Grid article with HTML tag
-(17, 9), -- Blockchain article with Database tag
-(18, 2), -- Quantum Computing article with Science tag
-(19, 7), -- Responsive Web Design article with HTML tag
-(19, 8), -- Responsive Web Design article with CSS tag
-(20, 7), -- Responsive Web Design article with HTML tag
-(20, 8); -- Responsive Web Design article with CSS tag
+(1, 1), 
+(1, 10), 
+(2, 2),
+(2, 3), 
+(3, 4),
+(3, 5),
+(3, 9), 
+(4, 1),
+(4, 10),
+(4, 11),
+(5, 6),
+(5, 7),
+(5, 8),
+(6, 16),
+(7, 17),
+(7, 6),
+(8, 14),
+(8, 15), 
+(9, 20),
+(10, 17),
+(10, 18),
+(11, 13),
+(11, 12),
+(12, 11),
+(12, 1),
+(13, 1),
+(14, 14),
+(14, 15),
+(15, 20),
+(16, 8),
+(16, 7);
+
+
+-- INSERT INTO article_tags (article_id, tag_id) VALUES
+-- (1, 1), -- C# article with C# tag
+-- (1, 10), -- C# article with Entity Framework tag
+-- (2, 2), -- ASP.NET article with ASP.NET tag
+-- (2, 3), -- ASP.NET article with MVC tag
+-- (3, 4), -- PostgreSQL article with PostgreSQL tag
+-- (3, 5), -- PostgreSQL article with Full-Text Search tag
+-- (3, 9), -- PostgreSQL article with Database tag
+-- (4, 1), -- Entity Framework article with C# tag
+-- (4, 10), -- Entity Framework article with Entity Framework tag
+-- (4, 11), -- Entity Framework article with LINQ tag
+-- (5, 6), -- JavaScript article with JavaScript tag
+-- (5, 7), -- JavaScript article with HTML tag
+-- (5, 8), -- JavaScript article with CSS tag
+-- (6, 16), -- Python article with Python tag
+-- (7, 17), -- React article with React tag
+-- (7, 6), -- React article with JavaScript tag
+-- (8, 14), -- Machine Learning article with AI tag
+-- (8, 15), -- Machine Learning article with Machine Learning tag
+-- (9, 20), -- Docker article with Docker tag
+-- (10, 17), -- Angular vs React article with React tag
+-- (10, 18), -- Angular vs React article with Angular tag
+-- (11, 13), -- Cloud Computing article with Cloud Computing tag
+-- (11, 12), -- Cloud Computing article with Azure tag
+-- (12, 11), -- LINQ article with LINQ tag
+-- (12, 1), -- LINQ article with C# tag
+-- (13, 1), -- Xamarin article with C# tag
+-- (14, 14), -- Neural Networks article with AI tag
+-- (14, 15), -- Neural Networks article with Machine Learning tag
+-- (15, 20), -- Microservices article with Docker tag
+-- (16, 8), -- CSS Grid article with CSS tag
+-- (16, 7), -- CSS Grid article with HTML tag
+-- (17, 9), -- Blockchain article with Database tag
+-- (18, 2), -- Quantum Computing article with Science tag
+-- (19, 7), -- Responsive Web Design article with HTML tag
+-- (19, 8), -- Responsive Web Design article with CSS tag
+-- (20, 7), -- Responsive Web Design article with HTML tag
+-- (20, 8); -- Responsive Web Design article with CSS tag
 
 -- Sample Full-Text Search Queries for PostgreSQL
 
