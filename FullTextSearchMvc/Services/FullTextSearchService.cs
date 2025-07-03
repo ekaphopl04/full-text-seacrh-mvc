@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using FullTextSearchMvc.Models;
 
@@ -10,10 +11,22 @@ namespace FullTextSearchMvc.Services
     public class FullTextSearchService
     {
         private readonly string _connectionString;
+        private readonly ILogger<FullTextSearchService> _logger;
 
-        public FullTextSearchService(IConfiguration configuration)
+        public FullTextSearchService(IConfiguration configuration, ILogger<FullTextSearchService> logger)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _logger = logger;
+            
+            // Log connection string availability
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                _logger.LogError("Database connection string is missing or empty");
+            }
+            else
+            {
+                _logger.LogInformation("Database connection string is configured");
+            }
         }
 
         public async Task<List<SearchResult>> SearchAsync(string query)
@@ -69,7 +82,7 @@ namespace FullTextSearchMvc.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Database error: {ex.Message}");
+                _logger.LogError(ex, "Database connection failed during search operation: {ErrorMessage}", ex.Message);
                 // Return empty results on error
                 return new List<SearchResult>();
             }
@@ -123,7 +136,7 @@ namespace FullTextSearchMvc.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Database error when retrieving all articles: {ex.Message}");
+                _logger.LogError(ex, "Database connection failed when retrieving all articles: {ErrorMessage}", ex.Message);
                 // Return empty list on error
                 return new List<Article>();
             }
