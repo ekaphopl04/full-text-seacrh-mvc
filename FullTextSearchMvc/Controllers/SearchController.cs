@@ -53,8 +53,14 @@ namespace FullTextSearchMvc.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Search(SearchModel model)
+        public async Task<IActionResult> Search(string query, string categoryFilter)
         {
+            var model = new SearchModel
+            {
+                Query = query,
+                CategoryFilter = categoryFilter
+            };
+            
             if (string.IsNullOrWhiteSpace(model.Query))
             {
                 return RedirectToAction("Index", new { categoryFilter = model.CategoryFilter });
