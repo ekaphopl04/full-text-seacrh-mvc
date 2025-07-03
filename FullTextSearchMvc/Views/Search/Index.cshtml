@@ -1,0 +1,52 @@
+@model FullTextSearchMvc.Models.SearchModel
+
+@{
+    ViewData["Title"] = "Full Text Search";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Full Text Search</h1>
+    
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-controller="Search" asp-action="Search" method="post">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Enter search query..." asp-for="Query">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Query))
+    {
+        <div class="mb-3">
+            <h4>Search results for: <span class="text-primary">@Model.Query</span></h4>
+            <p>Found @Model.Results.Count result(s)</p>
+        </div>
+
+        @if (Model.Results.Any())
+        {
+            <div class="list-group">
+                @foreach (var result in Model.Results)
+                {
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">@result.Title</h5>
+                            <small>Relevance: @result.Relevance.ToString("0.00")</small>
+                        </div>
+                        <p class="mb-1">@Html.Raw(result.Excerpt.Replace(Model.Query, $"<mark>{Model.Query}</mark>"))</p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                No results found for your search query.
+            </div>
+        }
+    }
+</div>
