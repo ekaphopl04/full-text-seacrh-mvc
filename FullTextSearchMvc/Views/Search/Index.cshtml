@@ -22,6 +22,42 @@
                                    asp-for="Query" 
                                    autocomplete="off"
                                    autofocus>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Search Type</label>
+                                    <div class="d-flex">
+                                        <div class="form-check me-4">
+                                            <input class="form-check-input" type="radio" name="searchType" id="regularSearch" value="regular" checked>
+                                            <label class="form-check-label" for="regularSearch">
+                                                Regular Search
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="searchType" id="categorySearch" value="category">
+                                            <label class="form-check-label" for="categorySearch">
+                                                Search with Category Filter
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4" id="categoryFilterContainer">
+                                <div class="form-group">
+                                    <label asp-for="CategoryFilter" class="form-label">Category</label>
+                                    <select asp-for="CategoryFilter" class="form-select" asp-items="@(new SelectList(Model.CategoryList, "Value", "Text"))">
+                                        <option value="">All Categories</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-group input-group-lg">
                             <button class="btn btn-primary px-4" type="submit">
                                 <i class="fas fa-search me-2"></i>Search
                             </button>
@@ -303,3 +339,26 @@
         }
     }
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Function to toggle category filter visibility
+            function toggleCategoryFilter() {
+                if ($('#regularSearch').is(':checked')) {
+                    $('#categoryFilterContainer').hide();
+                } else {
+                    $('#categoryFilterContainer').show();
+                }
+            }
+            
+            // Initial state
+            toggleCategoryFilter();
+            
+            // Listen for changes on radio buttons
+            $('input[name="searchType"]').change(function() {
+                toggleCategoryFilter();
+            });
+        });
+    </script>
+}

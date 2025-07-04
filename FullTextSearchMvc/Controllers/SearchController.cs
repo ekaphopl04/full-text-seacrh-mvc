@@ -42,6 +42,15 @@ namespace FullTextSearchMvc.Controllers
                     .Distinct()
                     .OrderBy(c => c)
                     .ToList();
+                    
+                // Populate the CategoryList for the dropdown in the view
+                model.CategoryList = model.AvailableCategories
+                    .Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                    {
+                        Value = c,
+                        Text = c
+                    })
+                    .ToList();
             }
             catch (Exception ex)
             {
@@ -53,12 +62,13 @@ namespace FullTextSearchMvc.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Search(string query, string categoryFilter)
+        public async Task<IActionResult> Search(string query, string categoryFilter, string searchType = "regular")
         {
             var model = new SearchModel
             {
                 Query = query,
-                CategoryFilter = categoryFilter
+                CategoryFilter = categoryFilter,
+                SearchType = searchType
             };
             
             if (string.IsNullOrWhiteSpace(model.Query))
@@ -79,11 +89,20 @@ namespace FullTextSearchMvc.Controllers
                     .OrderBy(c => c)
                     .ToList();
                 
+                // Populate the CategoryList for the dropdown in the view
+                model.CategoryList = model.AvailableCategories
+                    .Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                    {
+                        Value = c,
+                        Text = c
+                    })
+                    .ToList();
+                
                 // Use the PostgreSQL full-text search service
                 var results = await _searchService.SearchAsync(model.Query);
                 
-                // Apply category filter if selected
-                if (!string.IsNullOrEmpty(model.CategoryFilter))
+                // Apply category filter based on search type
+                if (model.SearchType == "category" && !string.IsNullOrEmpty(model.CategoryFilter))
                 {
                     results = results.Where(r => r.Category == model.CategoryFilter).ToList();
                 }
