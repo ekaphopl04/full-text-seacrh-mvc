@@ -64,6 +64,8 @@ namespace FullTextSearchMvc.Controllers
         [HttpPost]
         public async Task<IActionResult> Search(string query, string categoryFilter, string searchType = "regular")
         {
+            _logger.LogInformation("Starting search process with query: {Query}, category filter: {CategoryFilter}, search type: {SearchType}", query, categoryFilter, searchType);
+            
             var model = new SearchModel
             {
                 Query = query,
@@ -73,14 +75,17 @@ namespace FullTextSearchMvc.Controllers
             
             if (string.IsNullOrWhiteSpace(model.Query))
             {
+                _logger.LogInformation("Query is empty, redirecting to Index page with category filter: {CategoryFilter}", categoryFilter);
                 return RedirectToAction("Index", new { categoryFilter = model.CategoryFilter });
             }
 
             try
             {
+                _logger.LogInformation("Getting all articles for the dropdown and filtered display");
                 // Get all articles for the dropdown and filtered display
                 model.AllArticles = await _searchService.GetAllArticlesAsync();
                 
+                _logger.LogInformation("Getting all available categories for the filter dropdown");
                 // Get all available categories for the filter dropdown
                 model.AvailableCategories = model.AllArticles
                     .Where(a => !string.IsNullOrEmpty(a.Category))
@@ -89,6 +94,7 @@ namespace FullTextSearchMvc.Controllers
                     .OrderBy(c => c)
                     .ToList();
                 
+                _logger.LogInformation("Populating the CategoryList for the dropdown in the view");
                 // Populate the CategoryList for the dropdown in the view
                 model.CategoryList = model.AvailableCategories
                     .Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
@@ -98,15 +104,18 @@ namespace FullTextSearchMvc.Controllers
                     })
                     .ToList();
                 
+                _logger.LogInformation("Using the PostgreSQL full-text search service");
                 // Use the PostgreSQL full-text search service
                 var results = await _searchService.SearchAsync(model.Query);
                 
+                _logger.LogInformation("Applying category filter based on search type: {SearchType}", searchType);
                 // Apply category filter based on search type
                 if (model.SearchType == "category" && !string.IsNullOrEmpty(model.CategoryFilter))
                 {
                     results = results.Where(r => r.Category == model.CategoryFilter).ToList();
                 }
                 
+                _logger.LogInformation("Assigning search results to the model");
                 model.Results = results;
             }
             catch (Exception ex)
