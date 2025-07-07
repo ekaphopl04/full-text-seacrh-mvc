@@ -17,6 +17,48 @@ namespace FullTextSearchMvc.Controllers
             _searchService = searchService;
             _logger = logger;
         }
+        
+        // GET: Article/Create
+        public IActionResult Create()
+        {
+            return View(new Article
+            {
+                PublishedDate = DateTime.Now,
+                LastModified = DateTime.Now
+            });
+        }
+        
+        // POST: Article/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Article article)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    bool success = await _searchService.CreateArticleAsync(article);
+                    
+                    if (success)
+                    {
+                        _logger.LogInformation("New article created successfully with title: {Title}", article.Title);
+                        return RedirectToAction("Index", "Search");
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to create new article with title: {Title}", article.Title);
+                        ModelState.AddModelError(string.Empty, "Failed to create the article. Please try again.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating new article: {Message}", ex.Message);
+                    ModelState.AddModelError(string.Empty, "An error occurred while creating the article. Please try again.");
+                }
+            }
+            
+            return View(article);
+        }
 
         // GET: Article/Edit/5
         public async Task<IActionResult> Edit(int id)

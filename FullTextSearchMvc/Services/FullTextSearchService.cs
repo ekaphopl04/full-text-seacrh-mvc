@@ -241,5 +241,66 @@ namespace FullTextSearchMvc.Services
                 return false;
             }
         }
+    
+    
+    public async Task<bool> CreateArticleAsync(Article article)
+    {
+        try
+        {
+            _logger.LogInformation("Attempting to create a new article");
+            
+            // Set the current date for published and modified dates
+            article.PublishedDate = DateTime.UtcNow;
+            article.LastModified = DateTime.UtcNow;
+            
+            using (var connection = new NpgsqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                
+                using (var cmd = new NpgsqlCommand())
+                {
+                    cmd.Connection = connection;
+                    cmd.CommandText = @"
+                        INSERT INTO articles (title, content, author, category, published_date, last_modified)
+                        VALUES (@title, @content, @author, @category, @publishedDate, @lastModified)
+                        RETURNING article_id";
+                        
+                    cmd.Parameters.AddWithValue("title", article.Title);
+                    cmd.Parameters.AddWithValue("content", article.Content);
+                    cmd.Parameters.AddWithValue("author", article.Author ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("category", article.Category ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("publishedDate", article.PublishedDate);
+                    cmd.Parameters.AddWithValue("lastModified", article.LastModified);
+                    
+                    // Get the new article ID
+                    var articleId = await cmd.ExecuteScalarAsync();
+                    article.ArticleId = Convert.ToInt32(articleId);
+                    
+                    // Update the search vector for the new article
+                    using (var updateCmd = new NpgsqlCommand())
+                    {
+                        updateCmd.Connection = connection;
+                        updateCmd.CommandText = @"
+                            UPDATE articles
+                            SET search_vector = setweight(to_tsvector('english', title), 'A') ||
+                                               setweight(to_tsvector('english', COALESCE(content, '')), 'B') ||
+                                               setweight(to_tsvector('english', COALESCE(author, '')), 'C') ||
+                                               setweight(to_tsvector('english', COALESCE(category, '')), 'D')
+                            WHERE article_id = @id";
+                        updateCmd.Parameters.AddWithValue("id", article.ArticleId);
+                        
+                        await updateCmd.ExecuteNonQueryAsync();
+                    }
+                    
+                    return true;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating new article: {ErrorMessage}", ex.Message);
+            return false;
+        }
+    }
     }
 }
