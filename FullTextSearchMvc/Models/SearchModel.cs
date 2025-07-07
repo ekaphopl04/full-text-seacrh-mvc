@@ -8,6 +8,7 @@ namespace FullTextSearchMvc.Models
     {
         public string Query { get; set; }
         public string CategoryFilter { get; set; }
+        public string AuthorFilter { get; set; }
         public string SearchType { get; set; } = "regular"; // Default to regular search
         public List<string> AvailableCategories { get; set; } = new List<string>();
         public List<SelectListItem> CategoryList { get; set; } = new List<SelectListItem>();

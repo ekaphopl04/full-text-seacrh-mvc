@@ -62,14 +62,15 @@ namespace FullTextSearchMvc.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Search(string query, string categoryFilter, string searchType = "regular")
+        public async Task<IActionResult> Search(string query, string categoryFilter, string authorFilter, string searchType = "regular")
         {
-            _logger.LogInformation("Starting search process with query: {Query}, category filter: {CategoryFilter}, search type: {SearchType}", query, categoryFilter, searchType);
+            _logger.LogInformation("Starting search process with query: {Query}, category filter: {CategoryFilter}, author filter: {AuthorFilter}, search type: {SearchType}", query, categoryFilter, authorFilter, searchType);
             
             var model = new SearchModel
             {
                 Query = query,
                 CategoryFilter = categoryFilter,
+                AuthorFilter = authorFilter,
                 SearchType = searchType
             };
             
@@ -108,11 +109,23 @@ namespace FullTextSearchMvc.Controllers
                 // Use the PostgreSQL full-text search service
                 var results = await _searchService.SearchAsync(model.Query);
                 
-                _logger.LogInformation("Applying category filter based on search type: {SearchType}", searchType);
-                // Apply category filter based on search type
-                if (model.SearchType == "category" && !string.IsNullOrEmpty(model.CategoryFilter))
+                _logger.LogInformation("Applying filters based on search type: {SearchType}", searchType);
+                // Apply filters based on search type
+                if (model.SearchType == "category")
                 {
-                    results = results.Where(r => r.Category == model.CategoryFilter).ToList();
+                    // Apply category filter if specified
+                    if (!string.IsNullOrEmpty(model.CategoryFilter))
+                    {
+                        _logger.LogInformation("Filtering by category: {CategoryFilter}", model.CategoryFilter);
+                        results = results.Where(r => r.Category == model.CategoryFilter).ToList();
+                    }
+                    
+                    // Apply author filter if specified
+                    if (!string.IsNullOrEmpty(model.AuthorFilter))
+                    {
+                        _logger.LogInformation("Filtering by author: {AuthorFilter}", model.AuthorFilter);
+                        results = results.Where(r => r.Author == model.AuthorFilter).ToList();
+                    }
                 }
                 
                 _logger.LogInformation("Assigning search results to the model");
