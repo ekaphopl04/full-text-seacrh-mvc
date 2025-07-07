@@ -32,6 +32,7 @@
                                         <i class="fas fa-filter me-1"></i> Enable Search Filters
                                     </label>
                                 </div>
+                                <input type="hidden" name="enableFilters" id="enableFiltersField" value="false">
                             </div>
                         </div>
                         
@@ -366,8 +367,10 @@
         function toggleFilters(checked) {
             if (checked) {
                 $('#filtersContainer').show();
+                $('#enableFiltersField').val('true');
             } else {
                 $('#filtersContainer').hide();
+                $('#enableFiltersField').val('false');
             }
         }
     </script>

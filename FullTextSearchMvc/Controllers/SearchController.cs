@@ -62,9 +62,22 @@ namespace FullTextSearchMvc.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Search(string query, string categoryFilter, string authorFilter)
+        public async Task<IActionResult> Search(string query, string categoryFilter, string authorFilter, string enableFilters)
         {
-            _logger.LogInformation("Starting search process with query: {Query}, category filter: {CategoryFilter}, author filter: {AuthorFilter}", query, categoryFilter, authorFilter);
+            bool filtersEnabled = enableFilters == "true";
+            _logger.LogInformation("Starting search process with query: {Query}, filters enabled: {FiltersEnabled}", query, filtersEnabled);
+            
+            // If filters are not enabled, ignore the filter values
+            if (!filtersEnabled)
+            {
+                categoryFilter = null;
+                authorFilter = null;
+                _logger.LogInformation("Filters disabled, ignoring filter values");
+            }
+            else
+            {
+                _logger.LogInformation("Filters enabled, using category filter: {CategoryFilter}, author filter: {AuthorFilter}", categoryFilter, authorFilter);
+            }
             
             var model = new SearchModel
             {
