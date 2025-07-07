@@ -62,16 +62,15 @@ namespace FullTextSearchMvc.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Search(string query, string categoryFilter, string authorFilter, string searchType = "regular")
+        public async Task<IActionResult> Search(string query, string categoryFilter, string authorFilter)
         {
-            _logger.LogInformation("Starting search process with query: {Query}, category filter: {CategoryFilter}, author filter: {AuthorFilter}, search type: {SearchType}", query, categoryFilter, authorFilter, searchType);
+            _logger.LogInformation("Starting search process with query: {Query}, category filter: {CategoryFilter}, author filter: {AuthorFilter}", query, categoryFilter, authorFilter);
             
             var model = new SearchModel
             {
                 Query = query,
                 CategoryFilter = categoryFilter,
-                AuthorFilter = authorFilter,
-                SearchType = searchType
+                AuthorFilter = authorFilter
             };
             
             if (string.IsNullOrWhiteSpace(model.Query))
@@ -109,23 +108,20 @@ namespace FullTextSearchMvc.Controllers
                 // Use the PostgreSQL full-text search service
                 var results = await _searchService.SearchAsync(model.Query);
                 
-                _logger.LogInformation("Applying filters based on search type: {SearchType}", searchType);
-                // Apply filters based on search type
-                if (model.SearchType == "category")
+                _logger.LogInformation("Applying filters to search results");
+                
+                // Apply category filter if specified
+                if (!string.IsNullOrEmpty(model.CategoryFilter))
                 {
-                    // Apply category filter if specified
-                    if (!string.IsNullOrEmpty(model.CategoryFilter))
-                    {
-                        _logger.LogInformation("Filtering by category: {CategoryFilter}", model.CategoryFilter);
-                        results = results.Where(r => r.Category == model.CategoryFilter).ToList();
-                    }
-                    
-                    // Apply author filter if specified
-                    if (!string.IsNullOrEmpty(model.AuthorFilter))
-                    {
-                        _logger.LogInformation("Filtering by author: {AuthorFilter}", model.AuthorFilter);
-                        results = results.Where(r => r.Author == model.AuthorFilter).ToList();
-                    }
+                    _logger.LogInformation("Filtering by category: {CategoryFilter}", model.CategoryFilter);
+                    results = results.Where(r => r.Category == model.CategoryFilter).ToList();
+                }
+                
+                // Apply author filter if specified
+                if (!string.IsNullOrEmpty(model.AuthorFilter))
+                {
+                    _logger.LogInformation("Filtering by author: {AuthorFilter}", model.AuthorFilter);
+                    results = results.Where(r => r.Author == model.AuthorFilter).ToList();
                 }
                 
                 _logger.LogInformation("Assigning search results to the model");

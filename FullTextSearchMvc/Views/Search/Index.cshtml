@@ -36,7 +36,6 @@
                         </div>
                         
                         <div id="filtersContainer" class="row mb-3" style="display: none;">
-                            <input type="hidden" name="searchType" id="searchTypeField" value="regular">
                             
                             <div class="col-md-6 mb-3">
                                 <div class="form-group">
@@ -363,14 +362,12 @@
             toggleFilters(false);
         });
         
-        // Function to toggle filters visibility and update search type
+        // Function to toggle filters visibility
         function toggleFilters(checked) {
             if (checked) {
                 $('#filtersContainer').show();
-                $('#searchTypeField').val('category');
             } else {
                 $('#filtersContainer').hide();
-                $('#searchTypeField').val('regular');
             }
         }
     </script>
