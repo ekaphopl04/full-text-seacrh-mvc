@@ -3,8 +3,19 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Register the full-text search service
+// Add session support
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+// Register services
 builder.Services.AddScoped<FullTextSearchMvc.Services.FullTextSearchService>();
+builder.Services.AddScoped<FullTextSearchMvc.Services.LanguageService>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -17,7 +28,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
+
+// Use session middleware
+app.UseSession();
 
 app.UseAuthorization();
 

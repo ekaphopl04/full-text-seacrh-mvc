@@ -7,8 +7,8 @@
 <div class="container mt-5 fade-in">
     <div class="row mb-5">
         <div class="col-lg-8 mx-auto text-center">
-            <h1 class="display-4 fw-bold mb-3">Full Text Search</h1>
-            <p class="lead text-muted mb-5">Search through our knowledge base using powerful full-text search capabilities</p>
+            <h1 class="display-4 fw-bold mb-3"><translate key="FullTextSearch"></translate></h1>
+            <p class="lead text-muted mb-5"><translate key="SearchDescription"></translate></p>
             
             <div class="card mb-5 border-0">
                 <div class="card-body p-4">
@@ -16,7 +16,7 @@
                         <div class="search-container mb-4">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" class="form-control search-input" 
-                                   placeholder="What are you looking for?" 
+                                   placeholder="@(new LanguageService(Context.RequestServices.GetService<IHttpContextAccessor>(), Context.RequestServices.GetService<IWebHostEnvironment>()).GetTranslation("WhatAreYouLookingFor"))" 
                                    asp-for="Query" 
                                    autocomplete="off"
                                    autofocus>
@@ -27,7 +27,7 @@
                                 <div class="form-check form-switch d-inline-flex align-items-center p-2 px-3 bg-light rounded-pill">
                                     <input class="form-check-input me-2" type="checkbox" id="enableFilters" onchange="toggleFilters(this.checked)">
                                     <label class="form-check-label" for="enableFilters">
-                                        <i class="fas fa-filter me-2"></i> Advanced Filters
+                                        <i class="fas fa-filter me-2"></i> <translate key="AdvancedFilters"></translate>
                                     </label>
                                 </div>
                                 <input type="hidden" name="enableFilters" id="enableFiltersField" value="false">
@@ -38,17 +38,17 @@
                             <div class="col-12 mb-3">
                                 <div class="card bg-light border-0">
                                     <div class="card-body">
-                                        <h6 class="mb-3"><i class="fas fa-sliders-h me-2"></i>Filter Options</h6>
+                                        <h6 class="mb-3"><i class="fas fa-sliders-h me-2"></i><translate key="FilterOptions"></translate></h6>
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
                                                 <div class="form-group">
-                                                    <label asp-for="CategoryFilter" class="form-label">Category</label>
+                                                    <label asp-for="CategoryFilter" class="form-label"><translate key="Category"></translate></label>
                                                     <div class="input-group">
                                                         <span class="input-group-text bg-white border-end-0">
                                                             <i class="fas fa-folder text-primary"></i>
                                                         </span>
                                                         <select asp-for="CategoryFilter" class="form-select border-start-0" asp-items="@(new SelectList(Model.CategoryList, "Value", "Text"))">
-                                                            <option value="">All Categories</option>
+                                                            <option value=""><translate key="AllCategories"></translate></option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -56,13 +56,13 @@
                                             
                                             <div class="col-md-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="form-label">Author</label>
+                                                    <label class="form-label"><translate key="Author"></translate></label>
                                                     <div class="input-group">
                                                         <span class="input-group-text bg-white border-end-0">
                                                             <i class="fas fa-user text-primary"></i>
                                                         </span>
                                                         <select name="authorFilter" class="form-select border-start-0">
-                                                            <option value="">All Authors</option>
+                                                            <option value=""><translate key="AllAuthors"></translate></option>
                                                             @if (Model.AllArticles != null)
                                                             {
                                                                 var authors = Model.AllArticles
@@ -88,10 +88,10 @@
 
                         <div class="d-flex gap-2">
                             <button class="btn btn-primary px-4 py-2 flex-grow-1" type="submit">
-                                <i class="fas fa-search me-2"></i>Search
+                                <i class="fas fa-search me-2"></i><translate key="SearchButton"></translate>
                             </button>
                             <a href="@Url.Action("Index", "Search")" class="btn btn-outline-secondary px-4 py-2">
-                                <i class="fas fa-undo me-2"></i>Reset
+                                <i class="fas fa-undo me-2"></i><translate key="Reset"></translate>
                             </a>
                         </div>
                     </form>
@@ -108,14 +108,14 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <h4 class="mb-0 fw-bold">Search results for: <span class="badge bg-primary rounded-pill">@Model.Query</span></h4>
+                                <h4 class="mb-0 fw-bold"><translate key="SearchResultsFor"></translate> <span class="badge bg-primary rounded-pill">@Model.Query</span></h4>
                                 <p class="text-muted mb-0 mt-2">
-                                    <i class="fas fa-info-circle me-1"></i> Found <strong>@Model.Results.Count</strong> result(s)
+                                    <i class="fas fa-info-circle me-1"></i> <translate key="Found"></translate> <strong>@Model.Results.Count</strong> <translate key="Results"></translate>
                                 </p>
                             </div>
                             <div>
                                 <button class="btn btn-outline-secondary rounded-pill" onclick="window.location.href='@Url.Action("Index", "Search")'">
-                                    <i class="fas fa-times me-2"></i>Clear Results
+                                    <i class="fas fa-times me-2"></i><translate key="ClearResults"></translate>
                                 </button>
                             </div>
                         </div>
@@ -132,12 +132,12 @@
                             <table class="table mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Title</th>
-                                        <th>Content</th>
-                                        <th>Author</th>
-                                        <th>Category</th>
-                                        <th>Relevance</th>
-                                        <th>Actions</th>
+                                        <th><translate key="Title"></translate></th>
+                                        <th><translate key="Content"></translate></th>
+                                        <th><translate key="Author"></translate></th>
+                                        <th><translate key="Category"></translate></th>
+                                        <th><translate key="Relevance"></translate></th>
+                                        <th><translate key="Actions"></translate></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -161,10 +161,10 @@
                                             <td>
                                                 <div class="btn-group btn-group-sm">
                                                     <a href="@Url.Action("Edit", "Article", new { id = result.Id })" class="btn btn-outline-primary rounded-pill" title="Edit">
-                                                        <i class="fas fa-edit me-1"></i> Edit
+                                                        <i class="fas fa-edit me-1"></i> <translate key="Edit"></translate>
                                                     </a>
                                                     <button type="button" class="btn btn-outline-secondary rounded-pill ms-2" title="View" data-bs-toggle="modal" data-bs-target="#articleModal-@result.Id">
-                                                        <i class="fas fa-eye me-1"></i> View
+                                                        <i class="fas fa-eye me-1"></i> <translate key="View"></translate>
                                                     </button>
                                                 </div>
                                             </td>
@@ -176,8 +176,8 @@
                                             <td colspan="5" class="text-center py-5">
                                                 <div class="no-results">
                                                     <i class="fas fa-search-minus"></i>
-                                                    <h4 class="mt-3">No results found</h4>
-                                                    <p class="text-muted">We couldn't find any matches for "@Model.Query".<br>Please try different keywords or check your spelling.</p>
+                                                    <h4 class="mt-3"><translate key="NoResultsFound"></translate></h4>
+                                                    <p class="text-muted"><translate key="NoResultsDescription"></translate> "@Model.Query".<br><translate key="TryDifferentKeywords"></translate></p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -223,9 +223,9 @@
                                 </div>
                                 <div class="mt-3 d-flex justify-content-between align-items-center">
                                     <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye me-1"></i>View Full Content
+                                        <i class="fas fa-eye me-1"></i><translate key="ViewFullContent"></translate>
                                     </button>
-                                    <small class="text-muted">ID: @result.Id</small>
+                                    <small class="text-muted"><translate key="ID"></translate>: @result.Id</small>
                                 </div>
                             </div>
                         }
@@ -240,8 +240,8 @@
                     <div class="alert alert-info d-flex align-items-center p-4">
                         <i class="fas fa-info-circle me-3 fs-3"></i>
                         <div>
-                            <h5 class="mb-1">No results found</h5>
-                            <p class="mb-0">We couldn't find any matches for "@Model.Query". Please try different keywords or check your spelling.</p>
+                            <h5 class="mb-1"><translate key="NoResultsFound"></translate></h5>
+                            <p class="mb-0"><translate key="NoResultsDescription"></translate> "@Model.Query". <translate key="TryDifferentKeywords"></translate></p>
                         </div>
                     </div>
                 </div>
@@ -255,12 +255,12 @@
                 <div class="card border-0 bg-light">
                     <div class="card-body p-4 text-center">
                         <i class="fas fa-lightbulb text-warning fs-1 mb-3"></i>
-                        <h4>Search Tips</h4>
+                        <h4><translate key="SearchTips"></translate></h4>
                         <ul class="list-unstyled text-start">
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Use specific keywords for better results</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Try different word variations</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Keep your search terms simple</li>
-                            <li><i class="fas fa-check-circle text-success me-2"></i>Check your spelling</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i><translate key="Tip1"></translate></li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i><translate key="Tip2"></translate></li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i><translate key="Tip3"></translate></li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i><translate key="Tip4"></translate></li>
                         </ul>
                     </div>
                 </div>
@@ -274,9 +274,9 @@
         <div class="col-12">
             <div class="card border-0">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-newspaper me-2"></i>Knowledge Base Articles</h5>
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-newspaper me-2"></i><translate key="KnowledgeBaseArticles"></translate></h5>
                     <a href="@Url.Action("Create", "Article")" class="btn btn-light rounded-pill">
-                        <i class="fas fa-plus-circle me-2"></i>Create Article
+                        <i class="fas fa-plus-circle me-2"></i><translate key="CreateArticle"></translate>
                     </a>
                 </div>
                 <div class="card-body p-0 pt-3">
@@ -286,13 +286,13 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>Title</th>
-                                        <th>Content</th>
-                                        <th>Author</th>
-                                        <th>Category</th>
-                                        <th>Published</th>
-                                        <th>Modified</th>
-                                        <th>Actions</th>
+                                        <th><translate key="Title"></translate></th>
+                                        <th><translate key="Content"></translate></th>
+                                        <th><translate key="Author"></translate></th>
+                                        <th><translate key="Category"></translate></th>
+                                        <th><translate key="Published"></translate></th>
+                                        <th><translate key="Modified"></translate></th>
+                                        <th><translate key="Actions"></translate></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -307,7 +307,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <span class="text-muted">No content</span>
+                                                    <span class="text-muted"><translate key="NoContent"></translate></span>
                                                 }
                                             </td>
                                             <td>
@@ -359,10 +359,10 @@
                                             <td>
                                                 <div class="btn-group btn-group-sm">
                                                     <a href="@Url.Action("Edit", "Article", new { id = article.ArticleId })" class="btn btn-outline-primary rounded-pill" title="Edit">
-                                                        <i class="fas fa-edit me-1"></i> Edit
+                                                        <i class="fas fa-edit me-1"></i> <translate key="Edit"></translate>
                                                     </a>
                                                     <button type="button" class="btn btn-outline-secondary rounded-pill ms-2" title="View" data-bs-toggle="modal" data-bs-target="#articleModal-@article.ArticleId">
-                                                        <i class="fas fa-eye me-1"></i> View
+                                                        <i class="fas fa-eye me-1"></i> <translate key="View"></translate>
                                                     </button>
                                                 </div>
                                             </td>
@@ -380,8 +380,8 @@
                                     <i class="fas fa-info-circle fa-2x text-info"></i>
                                 </div>
                                 <div>
-                                    <h5 class="mb-1">No Articles Found</h5>
-                                    <p class="mb-0">There are no articles in the database. Click the "Create Article" button to add your first article.</p>
+                                    <h5 class="mb-1"><translate key="NoArticlesFound"></translate></h5>
+                                    <p class="mb-0"><translate key="NoArticlesDescription"></translate></p>
                                 </div>
                             </div>
                         </div>
@@ -426,9 +426,9 @@
                         </div>
                         <div class="modal-footer">
                             <a href="@Url.Action("Edit", "Article", new { id = article.ArticleId })" class="btn btn-primary">
-                                <i class="fas fa-edit me-1"></i>Edit
+                                <i class="fas fa-edit me-1"></i><translate key="Edit"></translate>
                             </a>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><translate key="Close"></translate></button>
                         </div>
                     </div>
                 </div>
