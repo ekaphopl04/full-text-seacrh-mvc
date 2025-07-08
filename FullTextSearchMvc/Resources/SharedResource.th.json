@@ -58,5 +58,12 @@
   "ViewFullContent": "ดูเนื้อหาทั้งหมด",
   "ID": "รหัส",
   "Close": "ปิด",
-  "Published": "เผยแพร่เมื่อ"
+  "Published": "เผยแพร่เมื่อ",
+  "BackToSearch": "กลับไปยังค้นหา",
+  "FullTextSearchMvc": "ระบบค้นหาด้วยข้อความเต็มรูปแบบ",
+  "EditArticle": "แก้ไขบทความ",
+  "ViewArticle": "ดูบทความ",
+  "DeleteArticle": "ลบบทความ",
+  "SaveChanges": "บันทึกการเปลี่ยนแปลง",
+  "CancelChanges": "ยกเลิกการเปลี่ยนแปลง"
 }

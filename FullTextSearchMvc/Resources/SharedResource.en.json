@@ -58,5 +58,12 @@
   "ViewFullContent": "View Full Content",
   "ID": "ID",
   "Close": "Close",
-  "Published": "Published"
+  "Published": "Published",
+  "BackToSearch": "BackToSearch",
+  "FullTextSearchMvc": "FullTextSearchMvc",
+  "EditArticle": "EditArticle",
+  "ViewArticle": "ViewArticle",
+  "DeleteArticle": "DeleteArticle",
+  "SaveChanges": "SaveChanges",
+  "CancelChanges": "CancelChanges"
 }
