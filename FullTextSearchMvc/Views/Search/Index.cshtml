@@ -7,17 +7,15 @@
 <div class="container mt-5 fade-in">
     <div class="row mb-5">
         <div class="col-lg-8 mx-auto text-center">
-            <h1 class="display-4 fw-bold mb-4">Full Text Search</h1>
-            <p class="lead text-muted mb-4">Search through our knowledge base using powerful full-text search capabilities</p>
+            <h1 class="display-4 fw-bold mb-3">Full Text Search</h1>
+            <p class="lead text-muted mb-5">Search through our knowledge base using powerful full-text search capabilities</p>
             
-            <div class="card mb-5">
+            <div class="card mb-5 border-0">
                 <div class="card-body p-4">
                     <form asp-controller="Search" asp-action="Search" method="post">
-                        <div class="input-group input-group-lg mb-3">
-                            <span class="input-group-text bg-white border-end-0">
-                                <i class="fas fa-search text-primary"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0" 
+                        <div class="search-container mb-4">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control search-input" 
                                    placeholder="What are you looking for?" 
                                    asp-for="Query" 
                                    autocomplete="off"
@@ -26,10 +24,10 @@
 
                         <div class="row mb-3">
                             <div class="col-12 mb-3">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="enableFilters" onchange="toggleFilters(this.checked)">
+                                <div class="form-check form-switch d-inline-flex align-items-center p-2 px-3 bg-light rounded-pill">
+                                    <input class="form-check-input me-2" type="checkbox" id="enableFilters" onchange="toggleFilters(this.checked)">
                                     <label class="form-check-label" for="enableFilters">
-                                        <i class="fas fa-filter me-1"></i> Enable Search Filters
+                                        <i class="fas fa-filter me-2"></i> Advanced Filters
                                     </label>
                                 </div>
                                 <input type="hidden" name="enableFilters" id="enableFiltersField" value="false">
@@ -37,44 +35,62 @@
                         </div>
                         
                         <div id="filtersContainer" class="row mb-3" style="display: none;">
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="form-group">
-                                    <label asp-for="CategoryFilter" class="form-label">Category</label>
-                                    <select asp-for="CategoryFilter" class="form-select" asp-items="@(new SelectList(Model.CategoryList, "Value", "Text"))">
-                                        <option value="">All Categories</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="form-group">
-                                    <label class="form-label">Author</label>
-                                    <select name="authorFilter" class="form-select">
-                                        <option value="">All Authors</option>
-                                        @if (Model.AllArticles != null)
-                                        {
-                                            var authors = Model.AllArticles
-                                                .Where(a => !string.IsNullOrEmpty(a.Author))
-                                                .Select(a => a.Author)
-                                                .Distinct()
-                                                .OrderBy(a => a);
-                                                
-                                            foreach (var author in authors)
-                                            {
-                                                <option value="@author">@author</option>
-                                            }
-                                        }
-                                    </select>
+                            <div class="col-12 mb-3">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <h6 class="mb-3"><i class="fas fa-sliders-h me-2"></i>Filter Options</h6>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <div class="form-group">
+                                                    <label asp-for="CategoryFilter" class="form-label">Category</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-white border-end-0">
+                                                            <i class="fas fa-folder text-primary"></i>
+                                                        </span>
+                                                        <select asp-for="CategoryFilter" class="form-select border-start-0" asp-items="@(new SelectList(Model.CategoryList, "Value", "Text"))">
+                                                            <option value="">All Categories</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6 mb-3">
+                                                <div class="form-group">
+                                                    <label class="form-label">Author</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-white border-end-0">
+                                                            <i class="fas fa-user text-primary"></i>
+                                                        </span>
+                                                        <select name="authorFilter" class="form-select border-start-0">
+                                                            <option value="">All Authors</option>
+                                                            @if (Model.AllArticles != null)
+                                                            {
+                                                                var authors = Model.AllArticles
+                                                                    .Where(a => !string.IsNullOrEmpty(a.Author))
+                                                                    .Select(a => a.Author)
+                                                                    .Distinct()
+                                                                    .OrderBy(a => a);
+                                                                    
+                                                                foreach (var author in authors)
+                                                                {
+                                                                    <option value="@author">@author</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="input-group input-group-lg">
-                            <button class="btn btn-primary px-4" type="submit">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary px-4 py-2 flex-grow-1" type="submit">
                                 <i class="fas fa-search me-2"></i>Search
                             </button>
-                            <a href="@Url.Action("Index", "Search")" class="btn btn-outline-secondary px-4">
+                            <a href="@Url.Action("Index", "Search")" class="btn btn-outline-secondary px-4 py-2">
                                 <i class="fas fa-undo me-2"></i>Reset
                             </a>
                         </div>
@@ -88,15 +104,21 @@
     {
         <div class="row mb-4 fade-in">
             <div class="col-12">
-                <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded-3 shadow-sm">
-                    <div>
-                        <h4 class="mb-0">Search results for: <span class="badge bg-primary">@Model.Query</span></h4>
-                        <p class="text-muted mb-0 mt-1">Found @Model.Results.Count result(s)</p>
-                    </div>
-                    <div>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="window.location.href='@Url.Action("Index", "Search")'">
-                            <i class="fas fa-times me-1"></i>Clear Results
-                        </button>
+                <div class="card border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h4 class="mb-0 fw-bold">Search results for: <span class="badge bg-primary rounded-pill">@Model.Query</span></h4>
+                                <p class="text-muted mb-0 mt-2">
+                                    <i class="fas fa-info-circle me-1"></i> Found <strong>@Model.Results.Count</strong> result(s)
+                                </p>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-secondary rounded-pill" onclick="window.location.href='@Url.Action("Index", "Search")'">
+                                    <i class="fas fa-times me-2"></i>Clear Results
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -104,11 +126,11 @@
 
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card shadow-sm">
+                <div class="card border-0">
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
+                            <table class="table mb-0">
+                                <thead>
                                     <tr>
                                         <th>Title</th>
                                         <th>Content</th>
@@ -133,12 +155,15 @@
                                                 }
                                             </td>
                                             <td><span class="badge bg-secondary">@result.Category</span></td>
-                                            <td><span class="badge bg-info">@result.Relevance.ToString("0.00")</span></td>
+                                            <td><span class="badge bg-info text-dark">@result.Relevance.ToString("0.00")</span></td>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
-                                                    <a href="@Url.Action("Edit", "Article", new { id = result.Id })" class="btn btn-outline-secondary" title="Edit">
-                                                        <i class="fas fa-edit"></i>
+                                                    <a href="@Url.Action("Edit", "Article", new { id = result.Id })" class="btn btn-outline-primary rounded-pill" title="Edit">
+                                                        <i class="fas fa-edit me-1"></i> Edit
                                                     </a>
+                                                    <button type="button" class="btn btn-outline-secondary rounded-pill ms-2" title="View" data-bs-toggle="modal" data-bs-target="#articleModal-@result.Id">
+                                                        <i class="fas fa-eye me-1"></i> View
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -146,10 +171,11 @@
                                     @if (Model.Results.Count == 0)
                                     {
                                         <tr>
-                                            <td colspan="4" class="text-center py-4">
-                                                <div class="text-muted">
-                                                    <i class="fas fa-search fa-2x mb-3"></i>
-                                                    <p>No results found for your search query.</p>
+                                            <td colspan="5" class="text-center py-5">
+                                                <div class="no-results">
+                                                    <i class="fas fa-search-minus"></i>
+                                                    <h4 class="mt-3">No results found</h4>
+                                                    <p class="text-muted">We couldn't find any matches for "@Model.Query".<br>Please try different keywords or check your spelling.</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -244,26 +270,26 @@
     <!-- Articles Table Section -->
     <div class="row mt-5 fade-in">
         <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-table me-2"></i>Articles</h5>
-                    <a href="@Url.Action("Create", "Article")" class="btn btn-sm btn-light">
-                        <i class="fas fa-plus-circle me-1"></i>Create Article
+            <div class="card border-0">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-newspaper me-2"></i>Knowledge Base Articles</h5>
+                    <a href="@Url.Action("Create", "Article")" class="btn btn-light rounded-pill">
+                        <i class="fas fa-plus-circle me-2"></i>Create Article
                     </a>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0 pt-3">
                     @if (Model.AllArticles != null && Model.AllArticles.Any())
                     {
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead class="table-light">
+                            <table class="table">
+                                <thead>
                                     <tr>
                                         <th>Title</th>
                                         <th>Content</th>
                                         <th>Author</th>
                                         <th>Category</th>
-                                        <th>Published Date</th>
-                                        <th>Last Modified</th>
+                                        <th>Published</th>
+                                        <th>Modified</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -271,9 +297,29 @@
                                     @foreach (var article in Model.AllArticles)
                                     {
                                         <tr>
-                                            <td>@article.Title</td>
-                                            <td>@(string.IsNullOrEmpty(article.Content) ? "-" : article.Content)</td>
-                                            <td>@(string.IsNullOrEmpty(article.Author) ? "-" : article.Author)</td>
+                                            <td class="fw-bold">@article.Title</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(article.Content))
+                                                {
+                                                    @(article.Content.Length > 50 ? article.Content.Substring(0, 50) + "..." : article.Content)
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No content</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(article.Author))
+                                                {
+                                                    <span class="d-flex align-items-center">
+                                                        <i class="fas fa-user-circle me-2 text-primary"></i>@article.Author
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
                                             <td>
                                                 @if (!string.IsNullOrEmpty(article.Category))
                                                 {
@@ -281,16 +327,41 @@
                                                 }
                                                 else
                                                 {
-                                                    <span>-</span>
+                                                    <span class="text-muted">-</span>
                                                 }
                                             </td>
-                                            <td>@(article.PublishedDate != DateTime.MinValue ? article.PublishedDate.ToString("MMM dd, yyyy") : "-")</td>
-                                            <td>@(article.LastModified != DateTime.MinValue ? article.LastModified.ToString("MMM dd, yyyy") : "-")</td>
+                                            <td>
+                                                @if (article.PublishedDate != DateTime.MinValue)
+                                                {
+                                                    <span class="d-flex align-items-center">
+                                                        <i class="fas fa-calendar me-2 text-success"></i>@article.PublishedDate.ToString("MMM dd, yyyy")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (article.LastModified != DateTime.MinValue)
+                                                {
+                                                    <span class="d-flex align-items-center">
+                                                        <i class="fas fa-clock me-2 text-info"></i>@article.LastModified.ToString("MMM dd, yyyy")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
-                                                    <a href="@Url.Action("Edit", "Article", new { id = article.ArticleId })" class="btn btn-outline-secondary" title="Edit">
-                                                        <i class="fas fa-edit"></i>
+                                                    <a href="@Url.Action("Edit", "Article", new { id = article.ArticleId })" class="btn btn-outline-primary rounded-pill" title="Edit">
+                                                        <i class="fas fa-edit me-1"></i> Edit
                                                     </a>
+                                                    <button type="button" class="btn btn-outline-secondary rounded-pill ms-2" title="View" data-bs-toggle="modal" data-bs-target="#articleModal-@article.ArticleId">
+                                                        <i class="fas fa-eye me-1"></i> View
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -301,8 +372,16 @@
                     }
                     else
                     {
-                        <div class="alert alert-info mb-0">
-                            <i class="fas fa-info-circle me-2"></i>No articles found in the database.
+                        <div class="alert alert-info mb-0 border-0 rounded-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-info-circle fa-2x text-info"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">No Articles Found</h5>
+                                    <p class="mb-0">There are no articles in the database. Click the "Create Article" button to add your first article.</p>
+                                </div>
+                            </div>
                         </div>
                     }
                 </div>
@@ -356,20 +435,63 @@
     }
 </div>
 
+<!-- Scroll to top button -->
+<div class="scroll-to-top" id="scrollToTop">
+    <i class="fas fa-arrow-up"></i>
+</div>
+
 @section Scripts {
     <script>
         $(document).ready(function() {
             // Initialize the filter visibility
             toggleFilters(false);
+            
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+            
+            // Scroll to top functionality
+            const scrollToTopBtn = document.getElementById("scrollToTop");
+            
+            window.addEventListener("scroll", function() {
+                if (window.pageYOffset > 300) {
+                    scrollToTopBtn.classList.add("visible");
+                } else {
+                    scrollToTopBtn.classList.remove("visible");
+                }
+            });
+            
+            scrollToTopBtn.addEventListener("click", function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+            });
+            
+            // Add animation to cards
+            $(".card").each(function(index) {
+                $(this).css("animation-delay", (index * 0.1) + "s");
+            });
+            
+            // Add active class to current nav item
+            const currentPath = window.location.pathname;
+            $(".nav-link").each(function() {
+                const href = $(this).attr("href");
+                if (href && currentPath.includes(href)) {
+                    $(this).addClass("active bg-white text-primary");
+                }
+            });
         });
         
         // Function to toggle filters visibility
         function toggleFilters(checked) {
             if (checked) {
-                $('#filtersContainer').show();
+                $('#filtersContainer').show(300);
                 $('#enableFiltersField').val('true');
             } else {
-                $('#filtersContainer').hide();
+                $('#filtersContainer').hide(300);
                 $('#enableFiltersField').val('false');
             }
         }
