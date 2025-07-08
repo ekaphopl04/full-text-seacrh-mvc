@@ -134,6 +134,7 @@
                                     <tr>
                                         <th>Title</th>
                                         <th>Content</th>
+                                        <th>Author</th>
                                         <th>Category</th>
                                         <th>Relevance</th>
                                         <th>Actions</th>
@@ -154,6 +155,7 @@
                                                     @(result.Content?.Length > 100 ? result.Content.Substring(0, 100) + "..." : result.Content)
                                                 }
                                             </td>
+                                            <td><span class="badge bg-success text-dark">@result.Author</span></td>
                                             <td><span class="badge bg-secondary">@result.Category</span></td>
                                             <td><span class="badge bg-info text-dark">@result.Relevance.ToString("0.00")</span></td>
                                             <td>
