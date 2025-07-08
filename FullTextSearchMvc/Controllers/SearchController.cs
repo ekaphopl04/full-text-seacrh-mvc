@@ -85,22 +85,19 @@ namespace FullTextSearchMvc.Controllers
                 CategoryFilter = categoryFilter,
                 AuthorFilter = authorFilter
             };
-            
-            if (string.IsNullOrWhiteSpace(model.Query))
-            {
-                _logger.LogInformation("Query is empty, redirecting to Index page with category filter: {CategoryFilter}", categoryFilter);
-                return RedirectToAction("Index", new { categoryFilter = model.CategoryFilter });
-            }
 
             try
             {
                 _logger.LogInformation("Getting all articles for the dropdown and filtered display");
                 // Get all articles for the dropdown and filtered display
-                model.AllArticles = await _searchService.GetAllArticlesAsync();
+                var allArticles = await _searchService.GetAllArticlesAsync();
+                
+                // Store the original unfiltered articles for dropdown population
+                var unfilteredArticles = allArticles.ToList();
                 
                 _logger.LogInformation("Getting all available categories for the filter dropdown");
                 // Get all available categories for the filter dropdown
-                model.AvailableCategories = model.AllArticles
+                model.AvailableCategories = unfilteredArticles
                     .Where(a => !string.IsNullOrEmpty(a.Category))
                     .Select(a => a.Category)
                     .Distinct()
@@ -117,24 +114,83 @@ namespace FullTextSearchMvc.Controllers
                     })
                     .ToList();
                 
-                _logger.LogInformation("Using the PostgreSQL full-text search service");
-                // Use the PostgreSQL full-text search service
-                var results = await _searchService.SearchAsync(model.Query);
-                
-                _logger.LogInformation("Applying filters to search results");
-                
-                // Apply category filter if specified
-                if (!string.IsNullOrEmpty(model.CategoryFilter))
+                // Apply filters to AllArticles if enabled
+                if (filtersEnabled)
                 {
-                    _logger.LogInformation("Filtering by category: {CategoryFilter}", model.CategoryFilter);
-                    results = results.Where(r => r.Category == model.CategoryFilter).ToList();
+                    _logger.LogInformation("Applying filters to all articles");
+                    
+                    // Apply category filter if specified
+                    if (!string.IsNullOrEmpty(model.CategoryFilter))
+                    {
+                        _logger.LogInformation("Filtering all articles by category: {CategoryFilter}", model.CategoryFilter);
+                        _logger.LogInformation("Before filtering all articles by category: {Count} articles", allArticles.Count);
+                        allArticles = allArticles.Where(a => a.Category == model.CategoryFilter).ToList();
+                        _logger.LogInformation("After filtering all articles by category: {Count} articles", allArticles.Count);
+                    }
+                    
+                    // Apply author filter if specified
+                    if (!string.IsNullOrEmpty(model.AuthorFilter))
+                    {
+                        _logger.LogInformation("Filtering all articles by author: {AuthorFilter}", model.AuthorFilter);
+                        _logger.LogInformation("Before filtering all articles by author: {Count} articles", allArticles.Count);
+                        allArticles = allArticles.Where(a => a.Author == model.AuthorFilter).ToList();
+                        _logger.LogInformation("After filtering all articles by author: {Count} articles", allArticles.Count);
+                    }
                 }
                 
-                // Apply author filter if specified
-                if (!string.IsNullOrEmpty(model.AuthorFilter))
+                // Assign the filtered articles to the model
+                model.AllArticles = allArticles;
+                
+                List<SearchResult> results;
+                
+                // Implement the new conditions
+                if (string.IsNullOrWhiteSpace(model.Query))
                 {
-                    _logger.LogInformation("Filtering by author: {AuthorFilter}", model.AuthorFilter);
-                    results = results.Where(r => r.Author == model.AuthorFilter).ToList();
+                    _logger.LogInformation("Query is empty, showing all articles");
+                    
+                    // Convert filtered articles to search results format
+                    results = allArticles.Select(a => new SearchResult
+                    {
+                        Id = a.ArticleId,
+                        Title = a.Title,
+                        Content = a.Content,
+                        Author = a.Author,
+                        Category = a.Category,
+                        PublishedDate = a.PublishedDate,
+                        // No excerpt or relevance for full listing
+                        Excerpt = a.Content.Length > 200 ? a.Content.Substring(0, 200) + "..." : a.Content,
+                        Relevance = 0
+                    }).ToList();
+                }
+                else
+                {
+                    _logger.LogInformation("Using the PostgreSQL full-text search service");
+                    // Use the PostgreSQL full-text search service
+                    results = await _searchService.SearchAsync(model.Query);
+                    
+                    // Apply filters if enabled
+                    if (filtersEnabled)
+                    {
+                        _logger.LogInformation("Applying filters to search results");
+                        
+                        // Apply category filter if specified
+                        if (!string.IsNullOrEmpty(model.CategoryFilter))
+                        {
+                            _logger.LogInformation("Filtering by category: {CategoryFilter}", model.CategoryFilter);
+                            _logger.LogInformation("Before filtering by category: {Count} results", results.Count);
+                            results = results.Where(r => r.Category == model.CategoryFilter).ToList();
+                            _logger.LogInformation("After filtering by category: {Count} results", results.Count);
+                        }
+                        
+                        // Apply author filter if specified
+                        if (!string.IsNullOrEmpty(model.AuthorFilter))
+                        {
+                            _logger.LogInformation("Filtering by author: {AuthorFilter}", model.AuthorFilter);
+                            _logger.LogInformation("Before filtering by author: {Count} results", results.Count);
+                            results = results.Where(r => r.Author == model.AuthorFilter).ToList();
+                            _logger.LogInformation("After filtering by author: {Count} results", results.Count);
+                        }
+                    }
                 }
                 
                 _logger.LogInformation("Assigning search results to the model");
