@@ -305,3 +305,213 @@ INSERT INTO article_tags (article_id, tag_id) VALUES
 -- SELECT title, author
 -- FROM articles
 -- WHERE search_vector @@ to_tsquery('english', 'web & (development | design) & !mobile');
+
+
+-- Thai Articles with Full-Text Search Support
+
+-- Create Thai Articles Table
+CREATE TABLE thai_articles (
+    article_id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    author VARCHAR(100),
+    category VARCHAR(50),
+    published_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Categories Table
+CREATE TABLE categories_thai (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description VARCHAR(255)
+);
+
+-- Create Tags Table
+CREATE TABLE tags_thai (
+    tag_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description VARCHAR(255)
+);
+
+-- Create ArticleTags Junction Table for Thai Articles
+CREATE TABLE thai_article_tags (
+    article_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    PRIMARY KEY (article_id, tag_id),
+    FOREIGN KEY (article_id) REFERENCES thai_articles(article_id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags_thai(tag_id) ON DELETE CASCADE
+);
+
+-- Add tsvector column for Thai full-text search
+ALTER TABLE thai_articles ADD COLUMN search_vector tsvector;
+CREATE INDEX thai_articles_search_idx ON thai_articles USING GIN (search_vector);
+
+-- Create function to update Thai search vector
+-- Note: Using 'simple' configuration since PostgreSQL doesn't have built-in Thai dictionary
+-- For production, consider installing and configuring proper Thai dictionaries
+CREATE OR REPLACE FUNCTION thai_articles_search_vector_update() RETURNS trigger AS $$
+BEGIN
+    NEW.search_vector :=
+        setweight(to_tsvector('simple', COALESCE(NEW.title, '')), 'A') ||
+        setweight(to_tsvector('simple', COALESCE(NEW.content, '')), 'B') ||
+        setweight(to_tsvector('simple', COALESCE(NEW.author, '')), 'C') ||
+        setweight(to_tsvector('simple', COALESCE(NEW.category, '')), 'D');
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+INSERT INTO categories_thai (name, description) VALUES 
+('อาหารจานด่วน', 'บทความเกี่ยวกับอาหารจานด่วน'),
+('อาหารทะเล', 'บทความเกี่ยวกับอาหารทะเล'),
+('อาหารภาคกลาง', 'บทความเกี่ยวกับอาหารภาคกลาง'),
+('อาหารจานด่วน', 'บทความเกี่ยวกับอาหารจานด่วน'),
+('อาหารภาคเหนือ', 'บทความเกี่ยวกับอาหารภาคเหนือ'),
+('อาหารภาคอีสาน', 'บทความเกี่ยวกับอาหารภาคอีสาน'),
+('อาหารภาคอีสาน', 'บทความเกี่ยวกับอาหารภาคอีสาน'),
+('อาหารภาคใต้', 'บทความเกี่ยวกับอาหารภาคใต้'),
+('สตรีทฟู้ด', 'บทความเกี่ยวกับสตรีทฟู้ด'),
+('อาหารภาคอีสาน', 'บทความเกี่ยวกับอาหารภาคอีสาน'),
+('อาหารภาคใต้', 'บทความเกี่ยวกับอาหารภาคใต้'),
+('อาหารจานด่วน', 'บทความเกี่ยวกับอาหารจานด่วน'),
+('อาหารพื้นบ้าน', 'บทความเกี่ยวกับอาหารพื้นบ้าน'),
+('อาหารทะเล', 'บทความเกี่ยวกับอาหารทะเล'),
+('ของหวาน', 'บทความเกี่ยวกับของหวาน'),
+('ของกินเล่น', 'บทความเกี่ยวกับของกินเล่น'),
+('อาหารมังสวิรัติ', 'บทความเกี่ยวกับอาหารมังสวิรัติ'),
+('ขนมไทย', 'บทความเกี่ยวกับขนมไทย'),
+('ของหวาน', 'บทความเกี่ยวกับของหวาน'),
+('อาหารสุขภาพ', 'บทความเกี่ยวกับอาหารสุขภาพ');
+
+
+-- Insert Sample Tags
+INSERT INTO tags_thai (name) VALUES 
+('อาหารจานด่วน'), ('อาหารภาคเหนือ'), ('อาหารภาคกลาง'), ('อาหารภาคใต้'),
+('อาหารทะเล'), ('อาหารพื้นบ้าน'), ('สตรีทฟู้ด'), ('ของหวาน'), ('ของกินเล่น'),
+('อาหารมังสวิรัติ'), ('อาหารสุขภาพ');
+
+-- Create trigger to update Thai search vector
+CREATE TRIGGER thai_articles_search_vector_update
+BEFORE INSERT OR UPDATE ON thai_articles
+FOR EACH ROW EXECUTE FUNCTION thai_articles_search_vector_update();
+
+-- Insert Sample Thai Articles
+INSERT INTO thai_articles (title, content, author, category, published_date) VALUES
+('ข้าวมันไก่ สูตรต้นตำรับ', 
+'ข้าวมันไก่เป็นอาหารจานเดียวที่ได้รับความนิยมทั่วไทย เสิร์ฟพร้อมน้ำจิ้มรสจัดและน้ำซุปไก่ใสร้อนๆ ถือเป็นเมนูง่ายๆ แต่อร่อยและอิ่มท้อง', 
+'สมศักดิ์ ชิมดี', 'อาหารจานด่วน', '2025-01-01'),
+
+('ต้มยำกุ้ง รสชาติไทยแท้', 
+'ต้มยำกุ้งเป็นเมนูขึ้นชื่อของไทย มีรสเผ็ด เปรี้ยว หอมสมุนไพร เช่น ตะไคร้ ใบมะกรูด และพริกสด นิยมใส่กุ้งตัวใหญ่เพื่อความกลมกล่อม', 
+'สมหญิง รักกิน', 'อาหารทะเล', '2025-01-03'),
+
+('แกงเขียวหวานไก่ หอมกะทิกลมกล่อม', 
+'แกงเขียวหวานเป็นแกงไทยที่มีรสเผ็ดหวานเล็กน้อย มักใส่ไก่ มะเขือเปราะ และใบโหระพา นิยมกินคู่กับข้าวสวยหรือขนมจีน', 
+'อนันต์ อร่อยดี', 'อาหารภาคกลาง', '2025-01-05'),
+
+('ผัดไทย รสชาติระดับโลก', 
+'ผัดไทยเป็นอาหารจานเส้นที่มีชื่อเสียงไปทั่วโลก ทำจากเส้นจันท์ผัดกับไข่ เต้าหู้ กุ้งแห้ง และซอสเปรี้ยวหวาน โรยถั่วลิสงและมะนาว', 
+'วราภรณ์ ชวนชิม', 'อาหารจานด่วน', '2025-01-07'),
+
+('ข้าวซอย อาหารเหนือหอมเครื่องแกง', 
+'ข้าวซอยเป็นเมนูเส้นของภาคเหนือ ใช้เส้นบะหมี่ไข่ในน้ำแกงกะทิรสจัดจ้าน ใส่ไก่หรือลูกชิ้น โรยหอมเจียวและเส้นกรอบ', 
+'ศุภชัย ลิ้มลอง', 'อาหารภาคเหนือ', '2025-01-10'),
+
+('ลาบหมู อาหารอีสานรสจัด', 
+'ลาบหมูเป็นอาหารอีสานยอดนิยม ทำจากหมูสับปรุงรสด้วยน้ำมะนาว ข้าวคั่ว พริกป่น หอมแดง และใบสะระแหน่ กินคู่ผักสด', 
+'มนัส แซ่บเวอร์', 'อาหารภาคอีสาน', '2025-01-12'),
+
+('ส้มตำไทย แซ่บถึงใจ', 
+'ส้มตำไทยคือสลัดมะละกอที่มีรสหวาน เปรี้ยว เค็ม เผ็ดจากพริก น้ำมะนาว น้ำปลา และน้ำตาลปี๊บ เพิ่มความอร่อยด้วยกุ้งแห้งและถั่วลิสง', 
+'สายฝน ตำแหลก', 'อาหารภาคอีสาน', '2025-01-14'),
+
+('แกงส้มผักรวม เปรี้ยวจี๊ดโดนใจ', 
+'แกงส้มเป็นแกงไทยรสเปรี้ยว เผ็ด ใช้น้ำพริกแกงส้มและมะขามเปียก ต้มกับผักหลากชนิด เช่น ดอกแค มะละกอ และกุ้งสด', 
+'ณรงค์ เปรี้ยวจัด', 'อาหารภาคใต้', '2025-01-17'),
+
+('หมูกรอบจิ้มซีอิ๊วดำ', 
+'หมูกรอบเป็นเมนูที่ทำจากหมูสามชั้นทอดจนหนังกรอบ เสิร์ฟกับซีอิ๊วดำหวานและพริกน้ำส้ม นิยมกินคู่กับข้าวสวยหรือก๋วยจั๊บ', 
+'อารีย์ เค็มกรอบ', 'สตรีทฟู้ด', '2025-01-20'),
+
+('ไก่ย่างหนังกรอบสูตรอีสาน', 
+'ไก่ย่างแบบอีสานใช้การหมักเครื่องเทศจนเข้าเนื้อ แล้วย่างจนหนังกรอบ เสิร์ฟกับข้าวเหนียวและน้ำจิ้มแจ่วรสแซ่บ', 
+'วิทยา ย่างเก่ง', 'อาหารภาคอีสาน', '2025-01-22'),
+
+('ขนมจีนน้ำยาใต้ หอมเครื่องแกง', 
+'ขนมจีนน้ำยาใต้มีรสเผ็ดจัดจากพริกแห้ง ขมิ้น ตะไคร้ และกะทิ นิยมใส่เนื้อปลา แล้วราดลงบนเส้นขนมจีน พร้อมผักแนม', 
+'ปาริชาติ เผ็ดแรง', 'อาหารภาคใต้', '2025-01-25'),
+
+('ผัดกะเพรา ราชาอาหารจานด่วน', 
+'ผัดกะเพราเป็นเมนูจานด่วนยอดนิยม ใช้เนื้อสัตว์ผัดกับพริก กระเทียม และใบกะเพรา มักเสิร์ฟกับข้าวและไข่ดาว', 
+'ณัฐพล กะเพราเดือด', 'อาหารจานด่วน', '2025-01-27'),
+
+('แกงมัสมั่น รสชาติเข้มข้น', 
+'แกงมัสมั่นเป็นแกงไทยสไตล์อินเดีย ใช้เครื่องเทศหลากชนิดและกะทิเข้มข้น นิยมใส่เนื้อวัวหรือไก่ และมันฝรั่ง', 
+'ทิพย์ เก่งแกง', 'อาหารพื้นบ้าน', '2025-01-29'),
+
+('ยำวุ้นเส้นทะเล รสจัดจ้าน', 
+'ยำวุ้นเส้นเป็นอาหารยำยอดฮิต ใส่กุ้ง ปลาหมึก หมูสับ และผักหลากชนิด ปรุงรสเปรี้ยว หวาน เค็ม เผ็ดแบบไทยๆ', 
+'สุกัญญา ยำเก่ง', 'อาหารทะเล', '2025-02-01'),
+
+('ข้าวเหนียวมะม่วง ของหวานคู่ชาติ', 
+'ข้าวเหนียวมูนหอมกะทิ เสิร์ฟคู่กับมะม่วงสุกหวานฉ่ำ เป็นของหวานที่คนไทยและชาวต่างชาติหลงรัก', 
+'สุรชัย หวานมัน', 'ของหวาน', '2025-02-04'),
+
+('ปอเปี๊ยะทอดไส้ผัก', 
+'ปอเปี๊ยะทอดเป็นของว่างที่นิยมมาก ไส้ผักหรือหมูสับห่อด้วยแป้งบางๆ แล้วนำไปทอดจนกรอบ เสิร์ฟพร้อมน้ำจิ้มเปรี้ยวหวาน', 
+'อรนุช ทอดกรอบ', 'ของกินเล่น', '2025-02-07'),
+
+('เต้าหู้ทอดน้ำจิ้มถั่ว', 
+'เต้าหู้ทอดกรอบเสิร์ฟพร้อมน้ำจิ้มถั่วบดหวานๆ เป็นของกินเล่นหรือเมนูเจที่อร่อยและมีโปรตีนสูงจากพืช', 
+'สุภาวดี เจสุขใจ', 'อาหารมังสวิรัติ', '2025-02-10'),
+
+('ขนมเบื้องไทยโบราณ', 
+'ขนมเบื้องเป็นขนมไทยโบราณที่มีทั้งไส้หวานและไส้เค็ม แป้งกรอบ ไส้ไข่แดงฝอยหรือไส้กุ้งแห้ง ทำให้รสชาติเข้มข้นและหอมหวาน', 
+'บุษบา หวานกรอบ', 'ขนมไทย', '2025-02-12'),
+
+('บัวลอยไข่หวาน', 
+'บัวลอยทำจากแป้งข้าวเหนียวนุ่มๆ ในกะทิหอมหวาน นิยมใส่ไข่หวานเพิ่มความหอมและมัน กลายเป็นของหวานที่อบอุ่นหัวใจ', 
+'สมบัติ ละมุนลิ้น', 'ของหวาน', '2025-02-15'),
+
+('ไอศกรีมกะทิสด', 
+'ไอศกรีมกะทิสดทำจากกะทิเข้มข้น ไม่ใส่นมวัว นิยมเสิร์ฟพร้อมถั่วลิสง ข้าวเหนียว หรือขนมปัง เป็นเมนูดับร้อนแบบไทยๆ', 
+'เยาวลักษณ์ เย็นใจ', 'อาหารสุขภาพ', '2025-02-17');
+
+
+-- Create ArticleTags Junction Table for Thai Articles
+CREATE TABLE thai_article_tags (
+    article_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    PRIMARY KEY (article_id, tag_id),
+    FOREIGN KEY (article_id) REFERENCES thai_articles(article_id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags_thai(tag_id) ON DELETE CASCADE
+);
+
+-- Associate Thai Articles with Tags
+INSERT INTO thai_article_tags (article_id, tag_id) VALUES
+(1, 1), -- First Thai article with tag 1
+(1, 2), -- First Thai article with tag 2
+(2, 3), -- Second Thai article with tag 3
+(3, 4), -- Third Thai article with tag 4
+(4, 1), -- Fourth Thai article with tag 1
+(5, 2); -- Fifth Thai article with tag 2
+
+-- Sample Full-Text Search Queries for Thai
+
+-- 1. Basic Thai full-text search (using 'simple' configuration)
+-- SELECT title, author
+-- FROM thai_articles
+-- WHERE search_vector @@ to_tsquery('simple', 'การพัฒนา');
+
+-- 2. Ranking Thai results by relevance
+-- SELECT title, author, ts_rank(search_vector, query) AS rank
+-- FROM thai_articles, to_tsquery('simple', 'เว็บ & พัฒนา') query
+-- WHERE search_vector @@ query
+-- ORDER BY rank DESC;
+
+-- 3. Highlighting Thai search results
+-- SELECT title, author, 
+--   ts_headline('simple', content, to_tsquery('simple', 'ฐานข้อมูล'),
+--     'StartSel = <mark>, StopSel = </mark>, MaxWords=35, MinWords=15')
+-- FROM thai_articles
+-- WHERE search_vector @@ to_tsquery('simple', 'ฐานข้อมูล');
