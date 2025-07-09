@@ -86,5 +86,6 @@
   "NoItems": "No dishes found",
   "NoItemsMessage": "No dishes in the system, you can add new items now",
   "LastModified": "Last Modified",
-  "Management": "Management"
+  "Management": "Management",
+  "NewThaiArticle": "New Thai Article"
 }
