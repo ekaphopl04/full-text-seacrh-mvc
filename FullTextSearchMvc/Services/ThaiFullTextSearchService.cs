@@ -231,5 +231,93 @@ namespace FullTextSearchMvc.Services
             
             return categories;
         }
+        
+        public async Task<bool> CreateThaiArticleAsync(Article article)
+        {
+            try
+            {
+                _logger.LogInformation("Attempting to create a new Thai article with title: {Title}", article.Title);
+                using (var connection = new NpgsqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        cmd.CommandText = @"
+                            INSERT INTO thai_articles (title, content, author, category, published_date, last_modified)
+                            VALUES (@title, @content, @author, @category, @published_date, @last_modified)
+                            RETURNING article_id";
+                        
+                        cmd.Parameters.AddWithValue("title", article.Title);
+                        cmd.Parameters.AddWithValue("content", article.Content);
+                        cmd.Parameters.AddWithValue("author", (object)article.Author ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("category", (object)article.Category ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("published_date", article.PublishedDate);
+                        cmd.Parameters.AddWithValue("last_modified", article.LastModified);
+                        
+                        // Execute the command and get the new ID
+                        int newId = (int)await cmd.ExecuteScalarAsync();
+                        article.ArticleId = newId;
+                        
+                        _logger.LogInformation("Thai article created successfully with ID: {ArticleId}", newId);
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating Thai article: {ErrorMessage}", ex.Message);
+                return false;
+            }
+        }
+        
+        public async Task<bool> UpdateThaiArticleAsync(Article article)
+        {
+            try
+            {
+                _logger.LogInformation("Attempting to update Thai article with ID: {ArticleId}", article.ArticleId);
+                using (var connection = new NpgsqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = connection;
+                        cmd.CommandText = @"
+                            UPDATE thai_articles
+                            SET title = @title, content = @content, author = @author, 
+                                category = @category, last_modified = @last_modified
+                            WHERE article_id = @article_id";
+                        
+                        cmd.Parameters.AddWithValue("article_id", article.ArticleId);
+                        cmd.Parameters.AddWithValue("title", article.Title);
+                        cmd.Parameters.AddWithValue("content", article.Content);
+                        cmd.Parameters.AddWithValue("author", (object)article.Author ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("category", (object)article.Category ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("last_modified", DateTime.Now);
+                        
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                        bool success = rowsAffected > 0;
+                        
+                        if (success)
+                        {
+                            _logger.LogInformation("Thai article with ID {ArticleId} updated successfully", article.ArticleId);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Thai article with ID {ArticleId} was not updated, no matching record found", article.ArticleId);
+                        }
+                        
+                        return success;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating Thai article with ID {ArticleId}: {ErrorMessage}", article.ArticleId, ex.Message);
+                return false;
+            }
+        }
     }
 }
