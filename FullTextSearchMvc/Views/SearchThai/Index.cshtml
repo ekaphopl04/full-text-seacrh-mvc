@@ -1,14 +1,14 @@
 @model FullTextSearchMvc.Models.SearchModel
-
+@using Microsoft.Extensions.Localization
 @{
-    ViewData["Title"] = "ค้นหาข้อมูลภาษาไทย";
+    ViewData["Title"] = "SearchThai";
 }
 
 <div class="container mt-5 fade-in">
     <div class="row mb-5">
         <div class="col-lg-8 mx-auto text-center">
-            <h1 class="display-4 fw-bold mb-3">ระบบค้นหาข้อมูลภาษาไทย</h1>
-            <p class="lead text-muted mb-5">ค้นหาข้อมูลอาหารไทยได้อย่างรวดเร็วด้วยระบบค้นหา Full Text</p>
+            <h1 class="display-4 fw-bold mb-3"><translate key="ThaiSearchTitle"></translate></h1>
+            <p class="lead text-muted mb-5"><translate key="ThaiSearchSubTitle"></translate></p>
             
             <div class="card mb-5 border-0">
                 <div class="card-body p-4">
@@ -16,7 +16,7 @@
                         <div class="search-container mb-4">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" class="form-control search-input" 
-                                   placeholder="กรอกคำค้นหา..." 
+                                  placeholder="@(new LanguageService(Context.RequestServices.GetService<IHttpContextAccessor>(), Context.RequestServices.GetService<IWebHostEnvironment>()).GetTranslation("WhatAreYouLookingFor"))" 
                                    asp-for="Query" 
                                    autocomplete="off"
                                    autofocus>
@@ -27,7 +27,7 @@
                                 <div class="form-check form-switch d-inline-flex align-items-center p-2 px-3 bg-light rounded-pill">
                                     <input class="form-check-input me-2" type="checkbox" id="enableFilters" onchange="toggleFilters(this.checked)">
                                     <label class="form-check-label" for="enableFilters">
-                                        <i class="fas fa-filter me-2"></i> ตัวกรองขั้นสูง
+                                        <i class="fas fa-filter me-2"></i> <translate key="AdvancedFilter"></translate>
                                     </label>
                                 </div>
                                 <input type="hidden" name="enableFilters" id="enableFiltersField" value="false">
@@ -88,10 +88,10 @@
 
                         <div class="d-flex gap-2">
                             <button class="btn btn-primary px-4 py-2 flex-grow-1" type="submit">
-                                <i class="fas fa-search me-2"></i>ค้นหา
+                                <i class="fas fa-search me-2"></i><translate key="SearchButton"></translate>
                             </button>
                             <a href="@Url.Action("Index", "SearchThai")" class="btn btn-outline-secondary px-4 py-2">
-                                <i class="fas fa-undo me-2"></i>รีเซ็ต
+                                <i class="fas fa-undo me-2"></i><translate key="Reset"></translate>
                             </a>
                         </div>
                     </form>
@@ -108,14 +108,14 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <h4 class="mb-0 fw-bold">ผลการค้นหาสำหรับ <span class="badge bg-primary rounded-pill">@Model.Query</span></h4>
+                                <h4 class="mb-0 fw-bold"><translate key="SearchResultsFor"></translate> <span class="badge bg-primary rounded-pill">@Model.Query</span></h4>
                                 <p class="text-muted mb-0 mt-2">
-                                    <i class="fas fa-info-circle me-1"></i> พบ <strong>@Model.Results.Count</strong> รายการ
+                                    <i class="fas fa-info-circle me-1"></i> <translate key="Found"></translate> <strong>@Model.Results.Count</strong> <translate key="Items"></translate>
                                 </p>
                             </div>
                             <div>
                                 <button class="btn btn-outline-secondary rounded-pill" onclick="window.location.href='@Url.Action("Index", "SearchThai")'">
-                                    <i class="fas fa-times me-2"></i>ล้างผลการค้นหา
+                                    <i class="fas fa-times me-2"></i><translate key="ClearSearchResults"></translate>
                                 </button>
                             </div>
                         </div>
@@ -155,7 +155,7 @@
                                 </div>
                                 <div class="mt-3 d-flex justify-content-between align-items-center">
                                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#articleModal-@result.Id">
-                                        <i class="fas fa-eye me-1"></i>ดูเนื้อหาเต็ม
+                                        <i class="fas fa-eye me-1"></i><translate key="ViewFullContent"></translate>
                                     </button>
                                     <small class="text-muted">รหัส: @result.Id</small>
                                 </div>
@@ -172,8 +172,8 @@
                     <div class="alert alert-info d-flex align-items-center p-4">
                         <i class="fas fa-info-circle me-3 fs-3"></i>
                         <div>
-                            <h5 class="mb-1">ไม่พบผลลัพธ์</h5>
-                            <p class="mb-0">ไม่พบผลลัพธ์สำหรับการค้นหา "@Model.Query" ลองใช้คำค้นหาอื่นดูนะคะ</p>
+                            <h5 class="mb-1"><translate key="NoResultsFound"></translate></h5>
+                            <p class="mb-0"><translate key="NoResultsMessage"></translate> "@Model.Query" <translate key="TryDifferentSearch"></translate></p>
                         </div>
                     </div>
                 </div>
@@ -187,12 +187,12 @@
                 <div class="card border-0 bg-light">
                     <div class="card-body p-4 text-center">
                         <i class="fas fa-lightbulb text-warning fs-1 mb-3"></i>
-                        <h4>เคล็ดลับการค้นหา</h4>
+                        <h4><translate key="SearchTipsList"></translate></h4>
                         <ul class="list-unstyled text-start">
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>ใช้คำที่เฉพาะเจาะจงเพื่อให้ได้ผลลัพธ์ที่ดีที่สุด</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>ค้นหาด้วยชื่ออาหาร ประเภท หรือส่วนประกอบ</li>
-                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>ใช้ตัวกรองขั้นสูงเพื่อกรองผลลัพธ์ตามหมวดหมู่หรือผู้เขียน</li>
-                            <li><i class="fas fa-check-circle text-success me-2"></i>ถ้าไม่แน่ใจ ลองใช้คำค้นหาที่สั้นและง่าย</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i><translate key="SearchTip1"></translate></li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i><translate key="SearchTip2"></translate></li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i><translate key="SearchTip3"></translate></li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i><translate key="SearchTip4"></translate></li>
                         </ul>
                     </div>
                 </div>
@@ -206,9 +206,9 @@
         <div class="col-12">
             <div class="card border-0">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3">
-                    <h5 class="mb-0 fw-bold"><i class="fas fa-utensils me-2"></i>รายการอาหารไทย</h5>
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-utensils me-2"></i><translate key="ThaiDishList"></translate></h5>
                     <a href="#" class="btn btn-light rounded-pill">
-                        <i class="fas fa-plus-circle me-2"></i>เพิ่มรายการใหม่
+                        <i class="fas fa-plus-circle me-2"></i><translate key="AddNewItem"></translate>
                     </a>
                 </div>
                 <div class="card-body p-0 pt-3">
@@ -218,13 +218,13 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>ชื่อรายการ</th>
-                                        <th>คำอธิบาย</th>
-                                        <th>ผู้เขียน</th>
-                                        <th>หมวดหมู่</th>
-                                        <th>วันที่เผยแพร่</th>
-                                        <th>แก้ไขล่าสุด</th>
-                                        <th>การจัดการ</th>
+                                                                               <th><translate key="Title"></translate></th>
+                                        <th><translate key="Content"></translate></th>
+                                        <th><translate key="Author"></translate></th>
+                                        <th><translate key="Category"></translate></th>
+                                        <th><translate key="Published"></translate></th>
+                                        <th><translate key="Modified"></translate></th>
+                                        <th><translate key="Actions"></translate></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -239,7 +239,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <span class="text-muted">ไม่มีเนื้อหา</span>
+                                                    <span class="text-muted"><translate key="NoContent"></translate></span>
                                                 }
                                             </td>
                                             <td>
@@ -291,10 +291,10 @@
                                             <td>
                                                 <div class="btn-group btn-group-sm">
                                                     <a href="#" class="btn btn-outline-primary rounded-pill" title="แก้ไข">
-                                                        <i class="fas fa-edit me-1"></i> แก้ไข
+                                                        <i class="fas fa-edit me-1"></i> <translate key="Edit"></translate>
                                                     </a>
                                                     <button type="button" class="btn btn-outline-secondary rounded-pill ms-2" title="ดู" data-bs-toggle="modal" data-bs-target="#articleModal-@article.ArticleId">
-                                                        <i class="fas fa-eye me-1"></i> ดู
+                                                        <i class="fas fa-eye me-1"></i> <translate key="View"></translate>
                                                     </button>
                                                 </div>
                                             </td>
@@ -312,8 +312,8 @@
                                     <i class="fas fa-info-circle fa-2x text-info"></i>
                                 </div>
                                 <div>
-                                    <h5 class="mb-1">ไม่พบรายการอาหาร</h5>
-                                    <p class="mb-0">ยังไม่มีรายการอาหารในระบบ คุณสามารถเพิ่มรายการใหม่ได้เลย</p>
+                                    <h5 class="mb-1"><translate key="NoItems"></translate></h5>
+                                    <p class="mb-0"><translate key="NoItemsMessage"></translate></p>
                                 </div>
                             </div>
                         </div>
