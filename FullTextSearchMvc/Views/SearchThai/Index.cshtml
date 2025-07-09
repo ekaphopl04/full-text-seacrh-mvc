@@ -1,0 +1,419 @@
+@model FullTextSearchMvc.Models.SearchModel
+
+@{
+    ViewData["Title"] = "ค้นหาข้อมูลภาษาไทย";
+}
+
+<div class="container mt-5 fade-in">
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-4 fw-bold mb-3">ระบบค้นหาข้อมูลภาษาไทย</h1>
+            <p class="lead text-muted mb-5">ค้นหาข้อมูลอาหารไทยได้อย่างรวดเร็วด้วยระบบค้นหา Full Text</p>
+            
+            <div class="card mb-5 border-0">
+                <div class="card-body p-4">
+                    <form asp-controller="SearchThai" asp-action="Search" method="post">
+                        <div class="search-container mb-4">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control search-input" 
+                                   placeholder="กรอกคำค้นหา..." 
+                                   asp-for="Query" 
+                                   autocomplete="off"
+                                   autofocus>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12 mb-3">
+                                <div class="form-check form-switch d-inline-flex align-items-center p-2 px-3 bg-light rounded-pill">
+                                    <input class="form-check-input me-2" type="checkbox" id="enableFilters" onchange="toggleFilters(this.checked)">
+                                    <label class="form-check-label" for="enableFilters">
+                                        <i class="fas fa-filter me-2"></i> ตัวกรองขั้นสูง
+                                    </label>
+                                </div>
+                                <input type="hidden" name="enableFilters" id="enableFiltersField" value="false">
+                            </div>
+                        </div>
+                        
+                        <div id="filtersContainer" class="row mb-3" style="display: none;">
+                            <div class="col-12 mb-3">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body">
+                                        <h6 class="mb-3"><i class="fas fa-sliders-h me-2"></i>ตัวเลือกการกรอง</h6>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <div class="form-group">
+                                                    <label asp-for="CategoryFilter" class="form-label">หมวดหมู่</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-white border-end-0">
+                                                            <i class="fas fa-folder text-primary"></i>
+                                                        </span>
+                                                        <select asp-for="CategoryFilter" class="form-select border-start-0" asp-items="@(new SelectList(Model.CategoryList, "Value", "Text"))">
+                                                            <option value="">ทุกหมวดหมู่</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-6 mb-3">
+                                                <div class="form-group">
+                                                    <label class="form-label">ผู้เขียน</label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text bg-white border-end-0">
+                                                            <i class="fas fa-user text-primary"></i>
+                                                        </span>
+                                                        <select name="authorFilter" class="form-select border-start-0">
+                                                            <option value="">ทุกผู้เขียน</option>
+                                                            @if (Model.AllArticles != null)
+                                                            {
+                                                                var authors = Model.AllArticles
+                                                                    .Where(a => !string.IsNullOrEmpty(a.Author))
+                                                                    .Select(a => a.Author)
+                                                                    .Distinct()
+                                                                    .OrderBy(a => a);
+                                                                    
+                                                                foreach (var author in authors)
+                                                                {
+                                                                    <option value="@author">@author</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary px-4 py-2 flex-grow-1" type="submit">
+                                <i class="fas fa-search me-2"></i>ค้นหา
+                            </button>
+                            <a href="@Url.Action("Index", "SearchThai")" class="btn btn-outline-secondary px-4 py-2">
+                                <i class="fas fa-undo me-2"></i>รีเซ็ต
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Query))
+    {
+        <div class="row mb-4 fade-in">
+            <div class="col-12">
+                <div class="card border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h4 class="mb-0 fw-bold">ผลการค้นหาสำหรับ <span class="badge bg-primary rounded-pill">@Model.Query</span></h4>
+                                <p class="text-muted mb-0 mt-2">
+                                    <i class="fas fa-info-circle me-1"></i> พบ <strong>@Model.Results.Count</strong> รายการ
+                                </p>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-secondary rounded-pill" onclick="window.location.href='@Url.Action("Index", "SearchThai")'">
+                                    <i class="fas fa-times me-2"></i>ล้างผลการค้นหา
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Results.Any())
+        {
+            <div class="row fade-in">
+                <div class="col-12">
+                    <div class="list-group">
+                        @foreach (var result in Model.Results)
+                        {
+                            <div class="list-group-item p-4">
+                                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0 fw-bold">@result.Title</h5>
+                                    <span class="badge bg-success rounded-pill">ความเกี่ยวข้อง: @result.Relevance.ToString("0.00")</span>
+                                </div>
+                                <div class="mb-3 d-flex flex-wrap gap-2">
+                                    @if (!string.IsNullOrEmpty(result.Author))
+                                    {
+                                        <span class="badge bg-info text-dark"><i class="fas fa-user me-1"></i>@result.Author</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(result.Category))
+                                    {
+                                        <span class="badge bg-secondary"><i class="fas fa-folder me-1"></i>@result.Category</span>
+                                    }
+                                    @if (result.PublishedDate != DateTime.MinValue)
+                                    {
+                                        <span class="badge bg-light text-dark"><i class="fas fa-calendar me-1"></i>@result.PublishedDate.ToString("d MMM yyyy")</span>
+                                    }
+                                </div>
+                                <div class="bg-light p-3 rounded-3">
+                                    <p class="mb-0">@Html.Raw(result.Excerpt)</p>
+                                </div>
+                                <div class="mt-3 d-flex justify-content-between align-items-center">
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#articleModal-@result.Id">
+                                        <i class="fas fa-eye me-1"></i>ดูเนื้อหาเต็ม
+                                    </button>
+                                    <small class="text-muted">รหัส: @result.Id</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row fade-in">
+                <div class="col-12">
+                    <div class="alert alert-info d-flex align-items-center p-4">
+                        <i class="fas fa-info-circle me-3 fs-3"></i>
+                        <div>
+                            <h5 class="mb-1">ไม่พบผลลัพธ์</h5>
+                            <p class="mb-0">ไม่พบผลลัพธ์สำหรับการค้นหา "@Model.Query" ลองใช้คำค้นหาอื่นดูนะคะ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row mt-5 pt-4 fade-in">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 bg-light">
+                    <div class="card-body p-4 text-center">
+                        <i class="fas fa-lightbulb text-warning fs-1 mb-3"></i>
+                        <h4>เคล็ดลับการค้นหา</h4>
+                        <ul class="list-unstyled text-start">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>ใช้คำที่เฉพาะเจาะจงเพื่อให้ได้ผลลัพธ์ที่ดีที่สุด</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>ค้นหาด้วยชื่ออาหาร ประเภท หรือส่วนประกอบ</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>ใช้ตัวกรองขั้นสูงเพื่อกรองผลลัพธ์ตามหมวดหมู่หรือผู้เขียน</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>ถ้าไม่แน่ใจ ลองใช้คำค้นหาที่สั้นและง่าย</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    
+
+    <!-- Articles Table Section -->
+    <div class="row mt-5 fade-in">
+        <div class="col-12">
+            <div class="card border-0">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-utensils me-2"></i>รายการอาหารไทย</h5>
+                    <a href="#" class="btn btn-light rounded-pill">
+                        <i class="fas fa-plus-circle me-2"></i>เพิ่มรายการใหม่
+                    </a>
+                </div>
+                <div class="card-body p-0 pt-3">
+                    @if (Model.AllArticles != null && Model.AllArticles.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>ชื่อรายการ</th>
+                                        <th>คำอธิบาย</th>
+                                        <th>ผู้เขียน</th>
+                                        <th>หมวดหมู่</th>
+                                        <th>วันที่เผยแพร่</th>
+                                        <th>แก้ไขล่าสุด</th>
+                                        <th>การจัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var article in Model.AllArticles)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">@article.Title</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(article.Content))
+                                                {
+                                                    @(article.Content.Length > 50 ? article.Content.Substring(0, 50) + "..." : article.Content)
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">ไม่มีเนื้อหา</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(article.Author))
+                                                {
+                                                    <span class="d-flex align-items-center">
+                                                        <i class="fas fa-user-circle me-2 text-primary"></i>@article.Author
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(article.Category))
+                                                {
+                                                    <span class="badge bg-secondary">@article.Category</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (article.PublishedDate != DateTime.MinValue)
+                                                {
+                                                    <span class="d-flex align-items-center">
+                                                        <i class="fas fa-calendar me-2 text-success"></i>@article.PublishedDate.ToString("d MMM yyyy")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (article.LastModified != DateTime.MinValue)
+                                                {
+                                                    <span class="d-flex align-items-center">
+                                                        <i class="fas fa-clock me-2 text-info"></i>@article.LastModified.ToString("d MMM yyyy")
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="#" class="btn btn-outline-primary rounded-pill" title="แก้ไข">
+                                                        <i class="fas fa-edit me-1"></i> แก้ไข
+                                                    </a>
+                                                    <button type="button" class="btn btn-outline-secondary rounded-pill ms-2" title="ดู" data-bs-toggle="modal" data-bs-target="#articleModal-@article.ArticleId">
+                                                        <i class="fas fa-eye me-1"></i> ดู
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0 border-0 rounded-3">
+                            <div class="d-flex">
+                                <div class="me-3">
+                                    <i class="fas fa-info-circle fa-2x text-info"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">ไม่พบรายการอาหาร</h5>
+                                    <p class="mb-0">ยังไม่มีรายการอาหารในระบบ คุณสามารถเพิ่มรายการใหม่ได้เลย</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Article Content Modals -->
+    @if (Model.AllArticles != null && Model.AllArticles.Any())
+    {
+        @foreach (var article in Model.AllArticles)
+        {
+            <div class="modal fade" id="articleModal-@article.ArticleId" tabindex="-1" aria-labelledby="articleModalLabel-@article.ArticleId" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="articleModalLabel-@article.ArticleId">@article.Title</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3 d-flex flex-wrap gap-2">
+                                @if (!string.IsNullOrEmpty(article.Author))
+                                {
+                                    <span class="badge bg-info text-dark"><i class="fas fa-user me-1"></i>@article.Author</span>
+                                }
+                                @if (!string.IsNullOrEmpty(article.Category))
+                                {
+                                    <span class="badge bg-secondary"><i class="fas fa-folder me-1"></i>@article.Category</span>
+                                }
+                                <span class="badge bg-light text-dark"><i class="fas fa-calendar me-1"></i>@article.PublishedDate.ToString("d MMM yyyy")</span>
+                            </div>
+                            <div class="content-container p-3 bg-light rounded mb-3">
+                                @article.Content
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    <!-- Results Modals for Search Results -->
+    @if (Model.Results != null && Model.Results.Any())
+    {
+        @foreach (var result in Model.Results)
+        {
+            <div class="modal fade" id="articleModal-@result.Id" tabindex="-1" aria-labelledby="resultModalLabel-@result.Id" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="resultModalLabel-@result.Id">@result.Title</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3 d-flex flex-wrap gap-2">
+                                @if (!string.IsNullOrEmpty(result.Author))
+                                {
+                                    <span class="badge bg-info text-dark"><i class="fas fa-user me-1"></i>@result.Author</span>
+                                }
+                                @if (!string.IsNullOrEmpty(result.Category))
+                                {
+                                    <span class="badge bg-secondary"><i class="fas fa-folder me-1"></i>@result.Category</span>
+                                }
+                                @if (result.PublishedDate != DateTime.MinValue)
+                                {
+                                    <span class="badge bg-light text-dark"><i class="fas fa-calendar me-1"></i>@result.PublishedDate.ToString("d MMM yyyy")</span>
+                                }
+                            </div>
+                            <div class="content-container p-3 bg-light rounded mb-3">
+                                @result.Content
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function toggleFilters(checked) {
+            const filtersContainer = document.getElementById('filtersContainer');
+            const enableFiltersField = document.getElementById('enableFiltersField');
+            
+            if (checked) {
+                filtersContainer.style.display = 'block';
+                enableFiltersField.value = 'true';
+            } else {
+                filtersContainer.style.display = 'none';
+                enableFiltersField.value = 'false';
+            }
+        }
+    </script>
+}

@@ -65,5 +65,6 @@
   "ViewArticle": "ViewArticle",
   "DeleteArticle": "DeleteArticle",
   "SaveChanges": "SaveChanges",
-  "CancelChanges": "CancelChanges"
+  "CancelChanges": "CancelChanges",
+  "SearchThai": "SearchThai"
 }

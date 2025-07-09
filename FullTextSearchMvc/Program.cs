@@ -14,6 +14,7 @@ builder.Services.AddSession(options =>
 
 // Register services
 builder.Services.AddScoped<FullTextSearchMvc.Services.FullTextSearchService>();
+builder.Services.AddScoped<FullTextSearchMvc.Services.ThaiFullTextSearchService>();
 builder.Services.AddScoped<FullTextSearchMvc.Services.LanguageService>();
 builder.Services.AddHttpContextAccessor();
 

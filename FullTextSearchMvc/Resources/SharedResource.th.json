@@ -65,5 +65,6 @@
   "ViewArticle": "ดูบทความ",
   "DeleteArticle": "ลบบทความ",
   "SaveChanges": "บันทึกการเปลี่ยนแปลง",
-  "CancelChanges": "ยกเลิกการเปลี่ยนแปลง"
+  "CancelChanges": "ยกเลิกการเปลี่ยนแปลง",
+  "SearchThai": "ค้นหาภาษาไทย"
 }
