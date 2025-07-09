@@ -13,7 +13,8 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary border-bottom box-shadow mb-4">
+        <!-- Main Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
             <div class="container">
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="fas fa-search me-2"></i><translate key="FullTextSearchMvc"></translate>
@@ -24,66 +25,65 @@
                 </button>
                 <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
                     <ul class="navbar-nav">
-                        <li class="nav-item mx-2">
-                            <a class="nav-link rounded-pill px-3" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="fas fa-home me-2"></i> <translate key="Home"></translate>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="">
+                                <translate key="Home"></translate>
                             </a>
                         </li>
-                        <li class="nav-item mx-2">
-                            <a class="nav-link rounded-pill px-3" asp-area="" asp-controller="Search" asp-action="Index">
-                                <i class="fas fa-search me-2"></i> <translate key="Search"></translate>
+                        @* <li class="nav-item dropdown mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="hostingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                               <translate key="Search"></translate>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="hostingDropdown">
+                                <li><a class="dropdown-item" asp-controller="Search" asp-action="Index" ><translate key="Search"></translate></a></li>
+                                <li><a class="dropdown-item" asp-controller="SearchThai" asp-action="Index" ><translate key="SearchThai"></translate></a></li>
+                            </ul>
+                        </li> *@
+                          <li class="nav-item mx-1">
+                            <a class="nav-link" asp-area="" asp-controller="Search" asp-action="">
+                                <translate key="Search"></translate>
                             </a>
                         </li>
-                        <li class="nav-item mx-2">
-                            <a class="nav-link rounded-pill px-3" asp-area="" asp-controller="SearchThai" asp-action="Index">
-                                <i class="fas fa-search me-2"></i> <translate key="SearchThai"></translate>
+                          <li class="nav-item mx-1">
+                            <a class="nav-link" asp-area="" asp-controller="SearchThai" asp-action="Index">
+                                <translate key="SearchThai"></translate>
                             </a>
                         </li>
-                        <li class="nav-item mx-2">
-                            <a class="nav-link rounded-pill px-3" asp-area="" asp-controller="Article" asp-action="Create">
-                                <i class="fas fa-plus-circle me-2"></i> <translate key="NewArticle"></translate>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link" asp-area="" asp-controller="Article" asp-action="Create">
+                                <translate key="CreateArticle"></translate>
                             </a>
                         </li>
-                        <li class="nav-item mx-2">
-                            <a class="nav-link rounded-pill px-3" asp-area="" asp-controller="ThaiArticle" asp-action="Create">
-                                <i class="fas fa-plus-circle me-2"></i> <translate key="NewThaiArticle"></translate>
+                        <li class="nav-item mx-1">
+                            <a class="nav-link" asp-area="" asp-controller="ThaiArticle" asp-action="Create">
+                                <translate key="NewThaiArticle"></translate>
                             </a>
                         </li>
                     </ul>
                     <div class="d-flex align-items-center">
                         <div class="dropdown me-3">
-                            <button class="btn btn-outline-light rounded-pill dropdown-toggle" type="button" id="languageSelector" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-outline-light dropdown-toggle" type="button" id="languageSelector" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-globe me-2"></i> @(Context.Session.GetString("Language") == "th" ? "ภาษาไทย" : "English")
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="languageSelector">
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" aria-labelledby="languageSelector">
                                 <li><a class="dropdown-item language-option" href="#" data-language="en"><i class="fas fa-flag me-2"></i> English</a></li>
                                 <li><a class="dropdown-item language-option" href="#" data-language="th"><i class="fas fa-flag me-2"></i> ภาษาไทย</a></li>
                             </ul>
                         </div>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-light rounded-pill dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle me-2"></i> <translate key="Menu"></translate>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu">
-                                <li><h6 class="dropdown-header"><translate key="QuickActions"></translate></h6></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> <translate key="Settings"></translate></a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-question-circle me-2"></i> <translate key="Help"></translate></a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i> <translate key="SignOut"></translate></a></li>
-                            </ul>
-                        </div>
+                        @* <a class="btn btn-link text-light text-decoration-none" href="#"><translate key="Login"></translate></a>
+                        <a class="btn btn-primary rounded-pill ms-2" href="#"><translate key="GetStarted"></translate></a> *@
                     </div>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container mt-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer bg-light py-4 mt-5">
+    <footer class="border-top footer bg-dark text-light py-4 mt-5">
         <div class="container">
             <div class="text-center">
                 <p class="mb-0">&copy; 2025 - FullTextSearchMvc - <translate key="AllRightsReserved"></translate></p>

@@ -87,5 +87,6 @@
   "NoItemsMessage": "No dishes in the system, you can add new items now",
   "LastModified": "Last Modified",
   "Management": "Management",
-  "NewThaiArticle": "New Thai Article"
+  "NewThaiArticle": "New Thai Article",
+  "Article": "Article"
 }
